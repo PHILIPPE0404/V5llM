@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Testeur de requêtes</title>
 
 <style>
@@ -12,27 +13,35 @@
 
     body {
         margin: 0;
-        font-family: Arial, sans-serif;
-        background: #111827;
-        color: white;
+        min-height: 100vh;
+
         display: flex;
         justify-content: center;
         align-items: center;
-        min-height: 100vh;
+
+        font-family: Arial, sans-serif;
+
+        background: #111827;
+        color: white;
     }
 
     .container {
         width: 90%;
-        max-width: 650px;
-        background: #1f2937;
+        max-width: 700px;
+
         padding: 25px;
+
+        background: #1f2937;
+
         border-radius: 18px;
-        box-shadow: 0 10px 40px rgba(0,0,0,.4);
+
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
     }
 
     h1 {
         text-align: center;
         margin-top: 0;
+        margin-bottom: 25px;
     }
 
     .field {
@@ -41,34 +50,48 @@
 
     label {
         display: block;
+
         margin-bottom: 8px;
+
         font-size: 16px;
+        font-weight: bold;
     }
 
-    input[type="number"] {
+    input {
         width: 100%;
+
         padding: 13px;
+
         border: none;
         border-radius: 10px;
+
         background: #374151;
         color: white;
-        font-size: 17px;
+
+        font-size: 16px;
+
         outline: none;
     }
 
-    input[type="number"]:focus {
+    input:focus {
         box-shadow: 0 0 0 2px #60a5fa;
     }
 
     button {
         width: 100%;
+
         padding: 14px;
+
         margin-top: 10px;
+
         border: none;
         border-radius: 10px;
+
         background: #2563eb;
         color: white;
+
         font-size: 17px;
+
         cursor: pointer;
     }
 
@@ -80,57 +103,104 @@
         background: #dc2626;
     }
 
+    button.stop:hover {
+        background: #b91c1c;
+    }
+
     .stats {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 10px;
+
+        grid-template-columns: repeat(5, 1fr);
+
+        gap: 8px;
+
         margin-top: 20px;
     }
 
     .stat {
         background: #374151;
-        padding: 15px 5px;
+
+        padding: 12px 5px;
+
         border-radius: 10px;
+
         text-align: center;
+
+        font-size: 13px;
     }
 
     .stat strong {
         display: block;
-        font-size: 22px;
+
         margin-top: 5px;
+
+        font-size: 21px;
     }
 
     .progress-container {
-        margin-top: 20px;
-        background: #374151;
-        border-radius: 10px;
-        overflow: hidden;
         height: 20px;
+
+        margin-top: 20px;
+
+        background: #374151;
+
+        border-radius: 10px;
+
+        overflow: hidden;
     }
 
     .progress {
-        height: 100%;
         width: 0%;
+        height: 100%;
+
         background: #22c55e;
-        transition: width .15s;
+
+        transition: width 0.15s;
+    }
+
+    .progress-text {
+        text-align: center;
+
+        margin-top: 7px;
+
+        font-size: 13px;
+
+        color: #9ca3af;
     }
 
     .logs {
+        height: 200px;
+
         margin-top: 20px;
-        background: #111827;
-        border-radius: 10px;
+
         padding: 12px;
-        height: 180px;
+
+        background: #111827;
+
+        border-radius: 10px;
+
         overflow-y: auto;
+
         font-family: monospace;
+
         font-size: 13px;
     }
 
     .info {
         margin-top: 15px;
-        color: #9ca3af;
-        font-size: 13px;
+
         text-align: center;
+
+        color: #9ca3af;
+
+        font-size: 13px;
+    }
+
+    @media (max-width: 600px) {
+
+        .stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
     }
 </style>
 </head>
@@ -141,8 +211,33 @@
 
     <h1>🧪 Testeur de requêtes</h1>
 
+
+    <!-- SITE -->
+
     <div class="field">
-        <label for="nombre">🔢 Nombre de requêtes</label>
+
+        <label for="url">
+            🌐 Site à tester
+        </label>
+
+        <input
+            type="url"
+            id="url"
+            value="http://127.0.0.1:5000/"
+            placeholder="https://exemple.com/"
+        >
+
+    </div>
+
+
+    <!-- NOMBRE -->
+
+    <div class="field">
+
+        <label for="nombre">
+            🔢 Nombre de requêtes
+        </label>
+
         <input
             type="number"
             id="nombre"
@@ -150,10 +245,18 @@
             min="1"
             max="100000"
         >
+
     </div>
 
+
+    <!-- TEMPS -->
+
     <div class="field">
-        <label for="temps">⏱️ Temps entre les requêtes (ms)</label>
+
+        <label for="temps">
+            ⏱️ Temps entre les requêtes (ms)
+        </label>
+
         <input
             type="number"
             id="temps"
@@ -161,15 +264,29 @@
             min="0"
             max="60000"
         >
+
     </div>
 
-    <button id="start">▶️ Démarrer</button>
 
-    <button id="stop" class="stop" style="display:none;">
+    <!-- BOUTONS -->
+
+    <button id="start">
+        ▶️ Démarrer
+    </button>
+
+    <button
+        id="stop"
+        class="stop"
+        style="display:none;"
+    >
         ⛔ Arrêter
     </button>
 
+
+    <!-- STATISTIQUES -->
+
     <div class="stats">
+
         <div class="stat">
             Total
             <strong id="total">0</strong>
@@ -181,205 +298,482 @@
         </div>
 
         <div class="stat">
-            Refusées
-            <strong id="refusees">0</strong>
+            426
+            <strong id="status426">0</strong>
+        </div>
+
+        <div class="stat">
+            429
+            <strong id="status429">0</strong>
         </div>
 
         <div class="stat">
             Erreurs
             <strong id="erreurs">0</strong>
         </div>
+
     </div>
+
+
+    <!-- PROGRESSION -->
 
     <div class="progress-container">
-        <div class="progress" id="progress"></div>
+
+        <div
+            class="progress"
+            id="progress"
+        ></div>
+
     </div>
 
-    <div class="logs" id="logs"></div>
+    <div
+        class="progress-text"
+        id="progressText"
+    >
+        0 %
+    </div>
+
+
+    <!-- LOG -->
+
+    <div
+        class="logs"
+        id="logs"
+    ></div>
+
 
     <div class="info">
-        Test local : https://0780119f.index-education.net/pronote/eleve.html
+        Utilise uniquement une adresse que tu contrôles ou que tu es autorisé à tester.
     </div>
 
 </div>
 
+
 <script>
 
-const URL_TEST = "https://0780119f.index-education.net/pronote/eleve.html";
+
+// ================================
+// VARIABLES
+// ================================
 
 let enCours = false;
+
 let total = 0;
 let acceptees = 0;
-let refusees = 0;
+let status426 = 0;
+let status429 = 0;
 let erreurs = 0;
 
-const nombreInput = document.getElementById("nombre");
-const tempsInput = document.getElementById("temps");
 
-const startButton = document.getElementById("start");
-const stopButton = document.getElementById("stop");
+// ================================
+// ELEMENTS
+// ================================
 
-const totalElement = document.getElementById("total");
-const accepteesElement = document.getElementById("acceptees");
-const refuseesElement = document.getElementById("refusees");
-const erreursElement = document.getElementById("erreurs");
+const urlInput =
+    document.getElementById("url");
 
-const progress = document.getElementById("progress");
-const logs = document.getElementById("logs");
+const nombreInput =
+    document.getElementById("nombre");
 
+const tempsInput =
+    document.getElementById("temps");
+
+const startButton =
+    document.getElementById("start");
+
+const stopButton =
+    document.getElementById("stop");
+
+const totalElement =
+    document.getElementById("total");
+
+const accepteesElement =
+    document.getElementById("acceptees");
+
+const status426Element =
+    document.getElementById("status426");
+
+const status429Element =
+    document.getElementById("status429");
+
+const erreursElement =
+    document.getElementById("erreurs");
+
+const progress =
+    document.getElementById("progress");
+
+const progressText =
+    document.getElementById("progressText");
+
+const logs =
+    document.getElementById("logs");
+
+
+// ================================
+// ATTENTE
+// ================================
 
 function attendre(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+
+    return new Promise(
+        resolve => setTimeout(resolve, ms)
+    );
+
 }
 
 
+// ================================
+// LOG
+// ================================
+
 function ajouterLog(message) {
-    const ligne = document.createElement("div");
 
-    const heure = new Date().toLocaleTimeString();
+    const ligne =
+        document.createElement("div");
 
-    ligne.textContent = `[${heure}] ${message}`;
+    const heure =
+        new Date().toLocaleTimeString();
+
+    ligne.textContent =
+        `[${heure}] ${message}`;
 
     logs.appendChild(ligne);
 
-    logs.scrollTop = logs.scrollHeight;
+    logs.scrollTop =
+        logs.scrollHeight;
+
 }
 
+
+// ================================
+// STATS
+// ================================
 
 function mettreAJour() {
 
-    totalElement.textContent = total;
-    accepteesElement.textContent = acceptees;
-    refuseesElement.textContent = refusees;
-    erreursElement.textContent = erreurs;
+    totalElement.textContent =
+        total;
 
-    const objectif = parseInt(nombreInput.value) || 1;
+    accepteesElement.textContent =
+        acceptees;
 
-    const pourcentage = Math.min(
-        100,
-        (total / objectif) * 100
-    );
+    status426Element.textContent =
+        status426;
 
-    progress.style.width = pourcentage + "%";
+    status429Element.textContent =
+        status429;
+
+    erreursElement.textContent =
+        erreurs;
+
+
+    const objectif =
+        parseInt(nombreInput.value) || 1;
+
+
+    const pourcentage =
+        Math.min(
+            100,
+            (total / objectif) * 100
+        );
+
+
+    progress.style.width =
+        pourcentage + "%";
+
+
+    progressText.textContent =
+        Math.round(pourcentage) + " %";
+
 }
 
 
+// ================================
+// LANCER
+// ================================
+
 async function lancerTest() {
 
-    if (enCours) return;
-
-    const objectif = parseInt(nombreInput.value);
-    const delai = parseInt(tempsInput.value);
-
-    if (!objectif || objectif < 1) {
-        alert("Entre un nombre de requêtes valide.");
+    if (enCours) {
         return;
     }
 
-    if (delai < 0 || isNaN(delai)) {
-        alert("Entre un temps valide.");
+
+    const URL_TEST =
+        urlInput.value.trim();
+
+
+    const objectif =
+        parseInt(nombreInput.value);
+
+
+    const delai =
+        parseInt(tempsInput.value);
+
+
+    // Vérification URL
+
+    if (!URL_TEST) {
+
+        alert(
+            "Entre l'adresse du site à tester."
+        );
+
         return;
     }
+
+
+    // Vérification nombre
+
+    if (
+        isNaN(objectif) ||
+        objectif < 1
+    ) {
+
+        alert(
+            "Entre un nombre de requêtes valide."
+        );
+
+        return;
+    }
+
+
+    // Vérification temps
+
+    if (
+        isNaN(delai) ||
+        delai < 0
+    ) {
+
+        alert(
+            "Entre un temps valide."
+        );
+
+        return;
+    }
+
+
+    // RESET
 
     enCours = true;
 
     total = 0;
     acceptees = 0;
-    refusees = 0;
+    status426 = 0;
+    status429 = 0;
     erreurs = 0;
 
     logs.innerHTML = "";
 
-    startButton.style.display = "none";
-    stopButton.style.display = "block";
+    startButton.style.display =
+        "none";
+
+    stopButton.style.display =
+        "block";
+
 
     mettreAJour();
 
+
     ajouterLog(
-        `Test démarré : ${objectif} requêtes / ${delai} ms`
+        `🚀 Test démarré`
     );
 
-    while (total < objectif && enCours) {
+    ajouterLog(
+        `🌐 ${URL_TEST}`
+    );
+
+    ajouterLog(
+        `🔢 ${objectif} requêtes`
+    );
+
+    ajouterLog(
+        `⏱️ ${delai} ms entre chaque requête`
+    );
+
+
+    // ============================
+    // BOUCLE
+    // ============================
+
+    while (
+        total < objectif &&
+        enCours
+    ) {
 
         try {
 
-            const reponse = await fetch(URL_TEST, {
-                method: "GET",
-                cache: "no-store"
-            });
+            const reponse =
+                await fetch(
+                    URL_TEST,
+                    {
+                        method: "GET",
+                        cache: "no-store"
+                    }
+                );
+
 
             total++;
 
-            if (reponse.status === 429) {
 
-                refusees++;
+            // 429
+
+            if (
+                reponse.status === 429
+            ) {
+
+                status429++;
 
                 ajouterLog(
-                    `❌ Requête ${total} → 429`
+                    `🔴 ${total} → 429`
                 );
 
-            } else if (reponse.ok) {
+            }
+
+
+            // 426
+
+            else if (
+                reponse.status === 426
+            ) {
+
+                status426++;
+
+                ajouterLog(
+                    `🟠 ${total} → 426`
+                );
+
+            }
+
+
+            // 2xx
+
+            else if (
+                reponse.ok
+            ) {
 
                 acceptees++;
 
                 ajouterLog(
-                    `✅ Requête ${total} → ${reponse.status}`
+                    `🟢 ${total} → ${reponse.status}`
                 );
 
-            } else {
+            }
+
+
+            // AUTRES
+
+            else {
 
                 erreurs++;
 
                 ajouterLog(
-                    `⚠️ Requête ${total} → ${reponse.status}`
+                    `⚠️ ${total} → ${reponse.status}`
                 );
+
             }
 
-        } catch (erreur) {
+        }
+
+
+        catch (erreur) {
 
             total++;
+
             erreurs++;
 
             ajouterLog(
-                `⚠️ Requête ${total} → erreur réseau`
+                `⚠️ ${total} → erreur réseau`
             );
+
         }
+
 
         mettreAJour();
 
-        if (total < objectif && enCours) {
-            await attendre(delai);
+
+        // Attente
+
+        if (
+            total < objectif &&
+            enCours
+        ) {
+
+            await attendre(
+                delai
+            );
+
         }
+
     }
 
+
     terminerTest();
+
 }
 
+
+// ================================
+// TERMINER
+// ================================
 
 function terminerTest() {
 
     enCours = false;
 
-    startButton.style.display = "block";
-    stopButton.style.display = "none";
+
+    startButton.style.display =
+        "block";
+
+    stopButton.style.display =
+        "none";
+
 
     mettreAJour();
 
-    ajouterLog("🏁 Test terminé.");
+
+    ajouterLog(
+        "🏁 Test terminé."
+    );
+
 }
 
 
-startButton.addEventListener("click", lancerTest);
+// ================================
+// DEMARRER
+// ================================
+
+startButton.addEventListener(
+    "click",
+    lancerTest
+);
 
 
-stopButton.addEventListener("click", () => {
+// ================================
+// ARRETER
+// ================================
 
-    enCours = false;
+stopButton.addEventListener(
+    "click",
+    () => {
 
-    ajouterLog("⛔ Test arrêté.");
+        if (!enCours) {
+            return;
+        }
 
-    terminerTest();
-});
+
+        enCours = false;
+
+
+        ajouterLog(
+            "⛔ Test arrêté."
+        );
+
+
+        terminerTest();
+
+    }
+);
 
 </script>
 
