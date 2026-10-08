@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Testeur de requêtes</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #111827;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    .container {
+        width: 90%;
+        max-width: 650px;
+        background: #1f2937;
+        padding: 25px;
+        border-radius: 18px;
+        box-shadow: 0 10px 40px rgba(0,0,0,.4);
+    }
+
+    h1 {
+        text-align: center;
+        margin-top: 0;
+    }
+
+    .field {
+        margin: 18px 0;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 16px;
+    }
+
+    input[type="number"] {
+        width: 100%;
+        padding: 13px;
+        border: none;
+        border-radius: 10px;
+        background: #374151;
+        color: white;
+        font-size: 17px;
+        outline: none;
+    }
+
+    input[type="number"]:focus {
+        box-shadow: 0 0 0 2px #60a5fa;
+    }
+
+    button {
+        width: 100%;
+        padding: 14px;
+        margin-top: 10px;
+        border: none;
+        border-radius: 10px;
+        background: #2563eb;
+        color: white;
+        font-size: 17px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #1d4ed8;
+    }
+
+    button.stop {
+        background: #dc2626;
+    }
+
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .stat {
+        background: #374151;
+        padding: 15px 5px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .stat strong {
+        display: block;
+        font-size: 22px;
+        margin-top: 5px;
+    }
+
+    .progress-container {
+        margin-top: 20px;
+        background: #374151;
+        border-radius: 10px;
+        overflow: hidden;
+        height: 20px;
+    }
+
+    .progress {
+        height: 100%;
+        width: 0%;
+        background: #22c55e;
+        transition: width .15s;
+    }
+
+    .logs {
+        margin-top: 20px;
+        background: #111827;
+        border-radius: 10px;
+        padding: 12px;
+        height: 180px;
+        overflow-y: auto;
+        font-family: monospace;
+        font-size: 13px;
+    }
+
+    .info {
+        margin-top: 15px;
+        color: #9ca3af;
+        font-size: 13px;
+        text-align: center;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🧪 Testeur de requêtes</h1>
+
+    <div class="field">
+        <label for="nombre">🔢 Nombre de requêtes</label>
+        <input
+            type="number"
+            id="nombre"
+            value="100"
+            min="1"
+            max="100000"
+        >
+    </div>
+
+    <div class="field">
+        <label for="temps">⏱️ Temps entre les requêtes (ms)</label>
+        <input
+            type="number"
+            id="temps"
+            value="100"
+            min="0"
+            max="60000"
+        >
+    </div>
+
+    <button id="start">▶️ Démarrer</button>
+
+    <button id="stop" class="stop" style="display:none;">
+        ⛔ Arrêter
+    </button>
+
+    <div class="stats">
+        <div class="stat">
+            Total
+            <strong id="total">0</strong>
+        </div>
+
+        <div class="stat">
+            Acceptées
+            <strong id="acceptees">0</strong>
+        </div>
+
+        <div class="stat">
+            Refusées
+            <strong id="refusees">0</strong>
+        </div>
+
+        <div class="stat">
+            Erreurs
+            <strong id="erreurs">0</strong>
+        </div>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress" id="progress"></div>
+    </div>
+
+    <div class="logs" id="logs"></div>
+
+    <div class="info">
+        Test local : https://0780119f.index-education.net/pronote/eleve.html
+    </div>
+
+</div>
+
+<script>
+
+const URL_TEST = "https://0780119f.index-education.net/pronote/eleve.html";
+
+let enCours = false;
+let total = 0;
+let acceptees = 0;
+let refusees = 0;
+let erreurs = 0;
+
+const nombreInput = document.getElementById("nombre");
+const tempsInput = document.getElementById("temps");
+
+const startButton = document.getElementById("start");
+const stopButton = document.getElementById("stop");
+
+const totalElement = document.getElementById("total");
+const accepteesElement = document.getElementById("acceptees");
+const refuseesElement = document.getElementById("refusees");
+const erreursElement = document.getElementById("erreurs");
+
+const progress = document.getElementById("progress");
+const logs = document.getElementById("logs");
+
+
+function attendre(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
+function ajouterLog(message) {
+    const ligne = document.createElement("div");
+
+    const heure = new Date().toLocaleTimeString();
+
+    ligne.textContent = `[${heure}] ${message}`;
+
+    logs.appendChild(ligne);
+
+    logs.scrollTop = logs.scrollHeight;
+}
+
+
+function mettreAJour() {
+
+    totalElement.textContent = total;
+    accepteesElement.textContent = acceptees;
+    refuseesElement.textContent = refusees;
+    erreursElement.textContent = erreurs;
+
+    const objectif = parseInt(nombreInput.value) || 1;
+
+    const pourcentage = Math.min(
+        100,
+        (total / objectif) * 100
+    );
+
+    progress.style.width = pourcentage + "%";
+}
+
+
+async function lancerTest() {
+
+    if (enCours) return;
+
+    const objectif = parseInt(nombreInput.value);
+    const delai = parseInt(tempsInput.value);
+
+    if (!objectif || objectif < 1) {
+        alert("Entre un nombre de requêtes valide.");
+        return;
+    }
+
+    if (delai < 0 || isNaN(delai)) {
+        alert("Entre un temps valide.");
+        return;
+    }
+
+    enCours = true;
+
+    total = 0;
+    acceptees = 0;
+    refusees = 0;
+    erreurs = 0;
+
+    logs.innerHTML = "";
+
+    startButton.style.display = "none";
+    stopButton.style.display = "block";
+
+    mettreAJour();
+
+    ajouterLog(
+        `Test démarré : ${objectif} requêtes / ${delai} ms`
+    );
+
+    while (total < objectif && enCours) {
+
+        try {
+
+            const reponse = await fetch(URL_TEST, {
+                method: "GET",
+                cache: "no-store"
+            });
+
+            total++;
+
+            if (reponse.status === 429) {
+
+                refusees++;
+
+                ajouterLog(
+                    `❌ Requête ${total} → 429`
+                );
+
+            } else if (reponse.ok) {
+
+                acceptees++;
+
+                ajouterLog(
+                    `✅ Requête ${total} → ${reponse.status}`
+                );
+
+            } else {
+
+                erreurs++;
+
+                ajouterLog(
+                    `⚠️ Requête ${total} → ${reponse.status}`
+                );
+            }
+
+        } catch (erreur) {
+
+            total++;
+            erreurs++;
+
+            ajouterLog(
+                `⚠️ Requête ${total} → erreur réseau`
+            );
+        }
+
+        mettreAJour();
+
+        if (total < objectif && enCours) {
+            await attendre(delai);
+        }
+    }
+
+    terminerTest();
+}
+
+
+function terminerTest() {
+
+    enCours = false;
+
+    startButton.style.display = "block";
+    stopButton.style.display = "none";
+
+    mettreAJour();
+
+    ajouterLog("🏁 Test terminé.");
+}
+
+
+startButton.addEventListener("click", lancerTest);
+
+
+stopButton.addEventListener("click", () => {
+
+    enCours = false;
+
+    ajouterLog("⛔ Test arrêté.");
+
+    terminerTest();
+});
+
+</script>
+
+</body>
+</html>
