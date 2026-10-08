@@ -786,11 +786,11 @@ async function lancerTest() {
 
     if (
         isNaN(delai) ||
-        delai < 10
+        delai < 0
     ) {
 
         alert(
-            "Le délai doit être d'au moins 10 ms."
+            "Le délai doit être d'au moins 0.1ms."
         );
 
         return;
