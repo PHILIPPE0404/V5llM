@@ -3,211 +3,238 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Testeur de requêtes</title>
 
 <style>
-    * {
-        box-sizing: border-box;
-    }
+* {
+    box-sizing: border-box;
+}
 
-    body {
-        margin: 0;
-        min-height: 100vh;
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    background: #111827;
+    color: white;
 
-        display: flex;
-        justify-content: center;
-        align-items: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-        font-family: Arial, sans-serif;
+.container {
+    width: 92%;
+    max-width: 720px;
+    background: #1f2937;
+    padding: 25px;
+    border-radius: 18px;
+    box-shadow: 0 10px 40px rgba(0,0,0,.4);
+}
 
-        background: #111827;
-        color: white;
-    }
+h1 {
+    text-align: center;
+    margin-top: 0;
+}
 
-    .container {
-        width: 90%;
-        max-width: 700px;
+.field {
+    margin: 18px 0;
+}
 
-        padding: 25px;
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
 
-        background: #1f2937;
+input,
+select {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 10px;
+    background: #374151;
+    color: white;
+    font-size: 16px;
+    outline: none;
+}
 
-        border-radius: 18px;
+input:focus,
+select:focus {
+    box-shadow: 0 0 0 2px #60a5fa;
+}
 
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
-    }
+button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 10px;
+    background: #2563eb;
+    color: white;
+    font-size: 17px;
+    cursor: pointer;
+}
 
-    h1 {
-        text-align: center;
-        margin-top: 0;
-        margin-bottom: 25px;
-    }
+button:hover {
+    background: #1d4ed8;
+}
 
-    .field {
-        margin: 18px 0;
-    }
+.stop {
+    background: #dc2626;
+}
 
-    label {
-        display: block;
+.stop:hover {
+    background: #b91c1c;
+}
 
-        margin-bottom: 8px;
+.hidden {
+    display: none !important;
+}
 
-        font-size: 16px;
-        font-weight: bold;
-    }
+/* PIN */
 
-    input {
-        width: 100%;
+#pinScreen {
+    width: 92%;
+    max-width: 400px;
+    background: #1f2937;
+    padding: 30px;
+    border-radius: 18px;
+    box-shadow: 0 10px 40px rgba(0,0,0,.4);
+}
 
-        padding: 13px;
+#pinScreen h1 {
+    margin-bottom: 25px;
+}
 
-        border: none;
-        border-radius: 10px;
+.pinError {
+    color: #f87171;
+    text-align: center;
+    margin-top: 12px;
+}
 
-        background: #374151;
-        color: white;
+/* STATS */
 
-        font-size: 16px;
+.stats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-top: 20px;
+}
 
-        outline: none;
-    }
+.stat {
+    background: #374151;
+    padding: 12px 5px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 13px;
+}
 
-    input:focus {
-        box-shadow: 0 0 0 2px #60a5fa;
-    }
+.stat strong {
+    display: block;
+    margin-top: 5px;
+    font-size: 21px;
+}
 
-    button {
-        width: 100%;
+/* PROGRESSION */
 
-        padding: 14px;
+.progress-container {
+    height: 20px;
+    margin-top: 20px;
+    background: #374151;
+    border-radius: 10px;
+    overflow: hidden;
+}
 
-        margin-top: 10px;
+.progress {
+    width: 0%;
+    height: 100%;
+    background: #22c55e;
+    transition: width .15s;
+}
 
-        border: none;
-        border-radius: 10px;
+.progressText {
+    text-align: center;
+    margin-top: 7px;
+    color: #9ca3af;
+}
 
-        background: #2563eb;
-        color: white;
+/* LOG */
 
-        font-size: 17px;
+.logs {
+    height: 200px;
+    margin-top: 20px;
+    padding: 12px;
+    background: #111827;
+    border-radius: 10px;
+    overflow-y: auto;
+    font-family: monospace;
+    font-size: 13px;
+}
 
-        cursor: pointer;
-    }
+.info {
+    margin-top: 15px;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 13px;
+}
 
-    button:hover {
-        background: #1d4ed8;
-    }
-
-    button.stop {
-        background: #dc2626;
-    }
-
-    button.stop:hover {
-        background: #b91c1c;
-    }
-
+@media(max-width:600px) {
     .stats {
-        display: grid;
-
-        grid-template-columns: repeat(5, 1fr);
-
-        gap: 8px;
-
-        margin-top: 20px;
+        grid-template-columns: repeat(2, 1fr);
     }
-
-    .stat {
-        background: #374151;
-
-        padding: 12px 5px;
-
-        border-radius: 10px;
-
-        text-align: center;
-
-        font-size: 13px;
-    }
-
-    .stat strong {
-        display: block;
-
-        margin-top: 5px;
-
-        font-size: 21px;
-    }
-
-    .progress-container {
-        height: 20px;
-
-        margin-top: 20px;
-
-        background: #374151;
-
-        border-radius: 10px;
-
-        overflow: hidden;
-    }
-
-    .progress {
-        width: 0%;
-        height: 100%;
-
-        background: #22c55e;
-
-        transition: width 0.15s;
-    }
-
-    .progress-text {
-        text-align: center;
-
-        margin-top: 7px;
-
-        font-size: 13px;
-
-        color: #9ca3af;
-    }
-
-    .logs {
-        height: 200px;
-
-        margin-top: 20px;
-
-        padding: 12px;
-
-        background: #111827;
-
-        border-radius: 10px;
-
-        overflow-y: auto;
-
-        font-family: monospace;
-
-        font-size: 13px;
-    }
-
-    .info {
-        margin-top: 15px;
-
-        text-align: center;
-
-        color: #9ca3af;
-
-        font-size: 13px;
-    }
-
-    @media (max-width: 600px) {
-
-        .stats {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    }
+}
 </style>
 </head>
 
 <body>
 
-<div class="container">
+
+<!-- ========================= -->
+<!-- ÉCRAN PIN -->
+<!-- ========================= -->
+
+<div id="pinScreen">
+
+    <h1>🔐 Accès</h1>
+
+    <div class="field">
+
+        <label for="pin">
+            Code PIN
+        </label>
+
+        <input
+            id="pin"
+            type="password"
+            inputmode="numeric"
+            maxlength="20"
+            placeholder="Entrez le code PIN"
+        >
+
+    </div>
+
+    <button id="pinButton">
+        🔓 Entrer
+    </button>
+
+    <div
+        id="pinError"
+        class="pinError hidden"
+    >
+        ❌ Code incorrect
+    </div>
+
+</div>
+
+
+<!-- ========================= -->
+<!-- APPLICATION -->
+<!-- ========================= -->
+
+<div
+    id="app"
+    class="container hidden"
+>
 
     <h1>🧪 Testeur de requêtes</h1>
 
@@ -224,32 +251,85 @@
             type="url"
             id="url"
             value="http://127.0.0.1:5000/"
-            placeholder="https://exemple.com/"
+            placeholder="https://ton-serveur.onrender.com/"
         >
 
     </div>
 
 
-    <!-- NOMBRE -->
+    <!-- MODE -->
 
     <div class="field">
 
-        <label for="nombre">
-            🔢 Nombre de requêtes
+        <label for="mode">
+            ⚙️ Mode de test
         </label>
 
-        <input
-            type="number"
-            id="nombre"
-            value="100"
-            min="1"
-            max="100000"
-        >
+        <select id="mode">
+
+            <option value="nombre">
+                🔢 Nombre de requêtes
+            </option>
+
+            <option value="duree">
+                ⏱️ Durée du test
+            </option>
+
+        </select>
 
     </div>
 
 
-    <!-- TEMPS -->
+    <!-- MODE NOMBRE -->
+
+    <div id="modeNombre">
+
+        <div class="field">
+
+            <label for="nombre">
+                🔢 Nombre de requêtes
+            </label>
+
+            <input
+                type="number"
+                id="nombre"
+                value="100"
+                min="1"
+                max="10000"
+            >
+
+        </div>
+
+    </div>
+
+
+    <!-- MODE DURÉE -->
+
+    <div
+        id="modeDuree"
+        class="hidden"
+    >
+
+        <div class="field">
+
+            <label for="duree">
+                ⌛ Durée du test (secondes)
+            </label>
+
+            <input
+                type="number"
+                id="duree"
+                value="30"
+                min="1"
+                max="3600"
+            >
+
+        </div>
+
+    </div>
+
+
+    <!-- DÉLAI -->
 
     <div class="field">
 
@@ -261,7 +341,7 @@
             type="number"
             id="temps"
             value="100"
-            min="0"
+            min="10"
             max="60000"
         >
 
@@ -276,14 +356,13 @@
 
     <button
         id="stop"
-        class="stop"
-        style="display:none;"
+        class="stop hidden"
     >
         ⛔ Arrêter
     </button>
 
 
-    <!-- STATISTIQUES -->
+    <!-- STATS -->
 
     <div class="stats">
 
@@ -327,7 +406,7 @@
     </div>
 
     <div
-        class="progress-text"
+        class="progressText"
         id="progressText"
     >
         0 %
@@ -343,7 +422,7 @@
 
 
     <div class="info">
-        Utilise uniquement une adresse que tu contrôles ou que tu es autorisé à tester.
+        Utilise uniquement un serveur que tu contrôles ou que tu es autorisé à tester.
     </div>
 
 </div>
@@ -351,29 +430,49 @@
 
 <script>
 
+/* =====================================
+   CONFIGURATION
+===================================== */
 
-// ================================
-// VARIABLES
-// ================================
-
-let enCours = false;
-
-let total = 0;
-let acceptees = 0;
-let status426 = 0;
-let status429 = 0;
-let erreurs = 0;
+const PIN = "1620";
 
 
-// ================================
-// ELEMENTS
-// ================================
+/* =====================================
+   ELEMENTS
+===================================== */
+
+const pinScreen =
+    document.getElementById("pinScreen");
+
+const pinInput =
+    document.getElementById("pin");
+
+const pinButton =
+    document.getElementById("pinButton");
+
+const pinError =
+    document.getElementById("pinError");
+
+const app =
+    document.getElementById("app");
+
+const mode =
+    document.getElementById("mode");
+
+const modeNombre =
+    document.getElementById("modeNombre");
+
+const modeDuree =
+    document.getElementById("modeDuree");
 
 const urlInput =
     document.getElementById("url");
 
 const nombreInput =
     document.getElementById("nombre");
+
+const dureeInput =
+    document.getElementById("duree");
 
 const tempsInput =
     document.getElementById("temps");
@@ -409,9 +508,91 @@ const logs =
     document.getElementById("logs");
 
 
-// ================================
-// ATTENTE
-// ================================
+/* =====================================
+   VARIABLES
+===================================== */
+
+let enCours = false;
+
+let total = 0;
+let acceptees = 0;
+let status426 = 0;
+let status429 = 0;
+let erreurs = 0;
+
+
+/* =====================================
+   PIN
+===================================== */
+
+function verifierPIN() {
+
+    if (pinInput.value === PIN) {
+
+        pinScreen.classList.add("hidden");
+
+        app.classList.remove("hidden");
+
+    } else {
+
+        pinError.classList.remove("hidden");
+
+        pinInput.value = "";
+
+        pinInput.focus();
+
+    }
+
+}
+
+
+pinButton.addEventListener(
+    "click",
+    verifierPIN
+);
+
+
+pinInput.addEventListener(
+    "keydown",
+    event => {
+
+        if (event.key === "Enter") {
+            verifierPIN();
+        }
+
+    }
+);
+
+
+/* =====================================
+   CHANGEMENT DE MODE
+===================================== */
+
+mode.addEventListener(
+    "change",
+    () => {
+
+        if (mode.value === "nombre") {
+
+            modeNombre.classList.remove("hidden");
+
+            modeDuree.classList.add("hidden");
+
+        } else {
+
+            modeNombre.classList.add("hidden");
+
+            modeDuree.classList.remove("hidden");
+
+        }
+
+    }
+);
+
+
+/* =====================================
+   ATTENDRE
+===================================== */
 
 function attendre(ms) {
 
@@ -422,9 +603,9 @@ function attendre(ms) {
 }
 
 
-// ================================
-// LOG
-// ================================
+/* =====================================
+   LOG
+===================================== */
 
 function ajouterLog(message) {
 
@@ -445,11 +626,11 @@ function ajouterLog(message) {
 }
 
 
-// ================================
-// STATS
-// ================================
+/* =====================================
+   STATS
+===================================== */
 
-function mettreAJour() {
+function mettreAJour(progression = 0) {
 
     totalElement.textContent =
         total;
@@ -466,31 +647,117 @@ function mettreAJour() {
     erreursElement.textContent =
         erreurs;
 
-
-    const objectif =
-        parseInt(nombreInput.value) || 1;
-
-
-    const pourcentage =
-        Math.min(
-            100,
-            (total / objectif) * 100
-        );
-
+    const valeur =
+        Math.min(100, Math.max(0, progression));
 
     progress.style.width =
-        pourcentage + "%";
-
+        valeur + "%";
 
     progressText.textContent =
-        Math.round(pourcentage) + " %";
+        Math.round(valeur) + " %";
 
 }
 
 
-// ================================
-// LANCER
-// ================================
+/* =====================================
+   RÉINITIALISER
+===================================== */
+
+function resetStats() {
+
+    total = 0;
+    acceptees = 0;
+    status426 = 0;
+    status429 = 0;
+    erreurs = 0;
+
+    logs.innerHTML = "";
+
+    mettreAJour(0);
+
+}
+
+
+/* =====================================
+   UNE REQUÊTE
+===================================== */
+
+async function faireRequete(URL_TEST) {
+
+    try {
+
+        const reponse =
+            await fetch(
+                URL_TEST,
+                {
+                    method: "GET",
+                    cache: "no-store"
+                }
+            );
+
+        total++;
+
+
+        if (reponse.status === 429) {
+
+            status429++;
+
+            ajouterLog(
+                `🔴 ${total} → 429`
+            );
+
+        }
+
+        else if (reponse.status === 426) {
+
+            status426++;
+
+            ajouterLog(
+                `🟠 ${total} → 426`
+            );
+
+        }
+
+        else if (reponse.ok) {
+
+            acceptees++;
+
+            ajouterLog(
+                `🟢 ${total} → ${reponse.status}`
+            );
+
+        }
+
+        else {
+
+            erreurs++;
+
+            ajouterLog(
+                `⚠️ ${total} → ${reponse.status}`
+            );
+
+        }
+
+    }
+
+    catch (erreur) {
+
+        total++;
+
+        erreurs++;
+
+        ajouterLog(
+            `⚠️ ${total} → erreur réseau`
+        );
+
+    }
+
+}
+
+
+/* =====================================
+   LANCER LE TEST
+===================================== */
 
 async function lancerTest() {
 
@@ -503,207 +770,203 @@ async function lancerTest() {
         urlInput.value.trim();
 
 
-    const objectif =
-        parseInt(nombreInput.value);
-
-
     const delai =
         parseInt(tempsInput.value);
 
 
-    // Vérification URL
-
     if (!URL_TEST) {
 
         alert(
-            "Entre l'adresse du site à tester."
+            "Entre l'adresse du serveur à tester."
         );
 
         return;
     }
 
-
-    // Vérification nombre
-
-    if (
-        isNaN(objectif) ||
-        objectif < 1
-    ) {
-
-        alert(
-            "Entre un nombre de requêtes valide."
-        );
-
-        return;
-    }
-
-
-    // Vérification temps
 
     if (
         isNaN(delai) ||
-        delai < 0
+        delai < 10
     ) {
 
         alert(
-            "Entre un temps valide."
+            "Le délai doit être d'au moins 10 ms."
         );
 
         return;
     }
 
 
-    // RESET
+    resetStats();
 
     enCours = true;
 
-    total = 0;
-    acceptees = 0;
-    status426 = 0;
-    status429 = 0;
-    erreurs = 0;
+    startButton.classList.add("hidden");
 
-    logs.innerHTML = "";
+    stopButton.classList.remove("hidden");
 
-    startButton.style.display =
-        "none";
-
-    stopButton.style.display =
-        "block";
-
-
-    mettreAJour();
-
-
-    ajouterLog(
-        `🚀 Test démarré`
-    );
 
     ajouterLog(
         `🌐 ${URL_TEST}`
     );
 
-    ajouterLog(
-        `🔢 ${objectif} requêtes`
-    );
 
     ajouterLog(
-        `⏱️ ${delai} ms entre chaque requête`
+        `⏱️ Intervalle : ${delai} ms`
     );
 
 
-    // ============================
-    // BOUCLE
-    // ============================
+    /* ==========================
+       MODE NOMBRE
+    ========================== */
 
-    while (
-        total < objectif &&
-        enCours
-    ) {
+    if (mode.value === "nombre") {
 
-        try {
+        const objectif =
+            parseInt(nombreInput.value);
 
-            const reponse =
-                await fetch(
-                    URL_TEST,
-                    {
-                        method: "GET",
-                        cache: "no-store"
-                    }
-                );
-
-
-            total++;
-
-
-            // 429
-
-            if (
-                reponse.status === 429
-            ) {
-
-                status429++;
-
-                ajouterLog(
-                    `🔴 ${total} → 429`
-                );
-
-            }
-
-
-            // 426
-
-            else if (
-                reponse.status === 426
-            ) {
-
-                status426++;
-
-                ajouterLog(
-                    `🟠 ${total} → 426`
-                );
-
-            }
-
-
-            // 2xx
-
-            else if (
-                reponse.ok
-            ) {
-
-                acceptees++;
-
-                ajouterLog(
-                    `🟢 ${total} → ${reponse.status}`
-                );
-
-            }
-
-
-            // AUTRES
-
-            else {
-
-                erreurs++;
-
-                ajouterLog(
-                    `⚠️ ${total} → ${reponse.status}`
-                );
-
-            }
-
-        }
-
-
-        catch (erreur) {
-
-            total++;
-
-            erreurs++;
-
-            ajouterLog(
-                `⚠️ ${total} → erreur réseau`
-            );
-
-        }
-
-
-        mettreAJour();
-
-
-        // Attente
 
         if (
-            total < objectif &&
-            enCours
+            isNaN(objectif) ||
+            objectif < 1 ||
+            objectif > 10000
         ) {
 
-            await attendre(
-                delai
+            alert(
+                "Le nombre doit être compris entre 1 et 10 000."
             );
 
+            terminerTest();
+
+            return;
         }
+
+
+        ajouterLog(
+            `🔢 Objectif : ${objectif} requêtes`
+        );
+
+
+        while (
+            enCours &&
+            total < objectif
+        ) {
+
+            await faireRequete(
+                URL_TEST
+            );
+
+
+            const progression =
+                (total / objectif) * 100;
+
+
+            mettreAJour(
+                progression
+            );
+
+
+            if (
+                enCours &&
+                total < objectif
+            ) {
+
+                await attendre(
+                    delai
+                );
+
+            }
+
+        }
+
+    }
+
+
+    /* ==========================
+       MODE DURÉE
+    ========================== */
+
+    else {
+
+        const duree =
+            parseInt(dureeInput.value);
+
+
+        if (
+            isNaN(duree) ||
+            duree < 1 ||
+            duree > 3600
+        ) {
+
+            alert(
+                "La durée doit être comprise entre 1 et 3600 secondes."
+            );
+
+            terminerTest();
+
+            return;
+        }
+
+
+        const debut =
+            Date.now();
+
+        const fin =
+            debut + duree * 1000;
+
+
+        ajouterLog(
+            `⌛ Durée : ${duree} secondes`
+        );
+
+
+        while (
+            enCours &&
+            Date.now() < fin
+        ) {
+
+            await faireRequete(
+                URL_TEST
+            );
+
+
+            const maintenant =
+                Date.now();
+
+
+            const progression =
+                ((maintenant - debut) /
+                (duree * 1000)) * 100;
+
+
+            mettreAJour(
+                Math.min(100, progression)
+            );
+
+
+            if (
+                enCours &&
+                Date.now() < fin
+            ) {
+
+                await attendre(
+                    delai
+                );
+
+            }
+
+        }
+
+    }
+
+
+    if (enCours) {
+
+        mettreAJour(100);
+
+        ajouterLog(
+            "🏁 Test terminé."
+        );
 
     }
 
@@ -713,35 +976,24 @@ async function lancerTest() {
 }
 
 
-// ================================
-// TERMINER
-// ================================
+/* =====================================
+   TERMINER
+===================================== */
 
 function terminerTest() {
 
     enCours = false;
 
+    startButton.classList.remove("hidden");
 
-    startButton.style.display =
-        "block";
-
-    stopButton.style.display =
-        "none";
-
-
-    mettreAJour();
-
-
-    ajouterLog(
-        "🏁 Test terminé."
-    );
+    stopButton.classList.add("hidden");
 
 }
 
 
-// ================================
-// DEMARRER
-// ================================
+/* =====================================
+   DÉMARRER
+===================================== */
 
 startButton.addEventListener(
     "click",
@@ -749,9 +1001,9 @@ startButton.addEventListener(
 );
 
 
-// ================================
-// ARRETER
-// ================================
+/* =====================================
+   ARRÊTER
+===================================== */
 
 stopButton.addEventListener(
     "click",
@@ -761,14 +1013,13 @@ stopButton.addEventListener(
             return;
         }
 
-
         enCours = false;
-
 
         ajouterLog(
             "⛔ Test arrêté."
         );
 
+        mettreAJour();
 
         terminerTest();
 
