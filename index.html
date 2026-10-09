@@ -29,7 +29,7 @@ button.action { flex: 1; min-width: 120px; padding: 12px; border: none; border-r
 button.action:disabled { opacity: .45; cursor: not-allowed; }
 .reset, .stop { background: #dc2626; } .verify, .start { background: #16a34a; }
 .neutral { background: #475569; } .download { background: #2563eb; }
-button.action:hover:not-------------disabled) { filter: brightness(1.1); }
+button.action:hover:not(:disabled) { filter: brightness(1.1); }
 .status { min-height: 24px; margin: 14px 0; font-weight: bold; line-height: 1.5; overflow-wrap: anywhere; }
 .success { color: #4ade80; } .error { color: #f87171; } .info { color: #38bdf8; }
 .config-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
@@ -149,6 +149,11 @@ progress::-moz-progress-bar { background: #38bdf8; border-radius: 20px; }
 </section>
 </main>
 
+<!-- Élément vidéo silencieux encodé en Base64 pour forcer le maintien en éveil (compatible HTTP/HTTPS) -->
+<video id="noSleepVideo" loop playsinline muted style="display:none; width:1px; height:1px;">
+  <source src="data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAAptZGF0AAAAA1YAAAEAAAEAAAE=" type="video/mp4">
+</video>
+
 <script>
 // CONFIGURATION : tests séquentiels et limites modérées.
 const CONFIG = {
@@ -167,27 +172,35 @@ const CONFIG = {
   DEFAULT_SCHEDULE_MINUTES: 15
 };
 
-// GESTION DU MAINTIEN ÉVEILLÉ (WAKE LOCK API)
+// SYSTEME DE MAINTIEN EN ÉVEIL (Combinaison Wake Lock API + Fallback Vidéo)
 let wakeLock = null;
+const noSleepVideo = document.getElementById("noSleepVideo");
 
-async function requestWakeLock() {
+async function enableKeepAwake() {
+  // 1. Essai avec l'API officielle Wake Lock
   if ('wakeLock' in navigator) {
     try {
       wakeLock = await navigator.wakeLock.request('screen');
-      log("Maintien en éveil activé pour l'appareil.");
-      wakeLock.addEventListener('release', () => {
-        wakeLock = null;
-      });
-    } catch (err) {
-      log("Avertissement : impossible d'activer le maintien en éveil (" + err.message + ").");
+      log("Maintien en éveil activé via WakeLock API.");
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+      return;
+    } catch (e) {
+      log("WakeLock API indisponible (" + e.message + "). Bascule sur la méthode vidéo.");
     }
+  }
+  // 2. Si l'API échoue ou est bloquée (ex: HTTP non sécurisé), utilisation de la vidéo muette en boucle
+  try {
+    await noSleepVideo.play();
+    log("Maintien en éveil activé via lecture vidéo.");
+  } catch (err) {
+    log("Échec du maintien en éveil : " + err.message);
   }
 }
 
-// Réactivation de la veille si l'onglet redevient visible après avoir été masqué
+// Réactivation automatique si la page repasse au premier plan
 document.addEventListener('visibilitychange', async () => {
-  if (wakeLock !== null && document.visibilityState === 'visible') {
-    await requestWakeLock();
+  if (document.visibilityState === 'visible') {
+    await enableKeepAwake();
   }
 });
 
@@ -217,7 +230,7 @@ colorButtons.forEach(button => {
 });
 
 document.getElementById("resetColors").addEventListener("click", resetColors);
-document.getElementById("verifyColors").addEventListener("click", () => {
+document.getElementById("verifyColors").addEventListener("click", async () => {
   const correct = selectedColors.length === SECRET_SEQUENCE.length &&
     selectedColors.every((value, index) => value === SECRET_SEQUENCE[index]);
   if (!correct) {
@@ -232,9 +245,9 @@ document.getElementById("verifyColors").addEventListener("click", () => {
   tester.hidden = false;
   initializeConfig();
   updateModeVisibility();
-  
-  // Demande le maintien en éveil dès que l'accès est autorisé
-  requestWakeLock();
+
+  // Activer l'anti-mise en veille suite à l'interaction utilisateur
+  await enableKeepAwake();
 });
 
 const urlInput = document.getElementById("url");
@@ -446,7 +459,6 @@ async function runBatch(target, count, interval, label, scheduleWindow) {
     }
     if (stopRequested) return false;
 
-    // L'intervalle est mesuré d'un départ de requête au suivant.
     const requestStartedAt = performance.now();
     const ok = await performRequest(target, `${label}, requête ${index + 1}/${count}`);
     if (!ok || stopRequested) return false;
@@ -462,9 +474,8 @@ async function runBatch(target, count, interval, label, scheduleWindow) {
 
 async function runTest() {
   if (running) return;
-  
-  // S'assure que le verrouillage d'écran est bien actif lors du lancement
-  await requestWakeLock();
+
+  await enableKeepAwake();
 
   let target;
   try {
