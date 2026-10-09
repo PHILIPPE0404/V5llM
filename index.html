@@ -2,1031 +2,598 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Testeur de requêtes</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accès sécurisé — Testeur HTTP</title>
 <style>
-* {
-    box-sizing: border-box;
-}
-
-body {
-    margin: 0;
-    min-height: 100vh;
-    font-family: Arial, sans-serif;
-    background: #111827;
-    color: white;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.container {
-    width: 92%;
-    max-width: 720px;
-    background: #1f2937;
-    padding: 25px;
-    border-radius: 18px;
-    box-shadow: 0 10px 40px rgba(0,0,0,.4);
-}
-
-h1 {
-    text-align: center;
-    margin-top: 0;
-}
-
-.field {
-    margin: 18px 0;
-}
-
-label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
-}
-
-input,
-select {
-    width: 100%;
-    padding: 13px;
-    border: none;
-    border-radius: 10px;
-    background: #374151;
-    color: white;
-    font-size: 16px;
-    outline: none;
-}
-
-input:focus,
-select:focus {
-    box-shadow: 0 0 0 2px #60a5fa;
-}
-
-button {
-    width: 100%;
-    padding: 14px;
-    margin-top: 10px;
-    border: none;
-    border-radius: 10px;
-    background: #2563eb;
-    color: white;
-    font-size: 17px;
-    cursor: pointer;
-}
-
-button:hover {
-    background: #1d4ed8;
-}
-
-.stop {
-    background: #dc2626;
-}
-
-.stop:hover {
-    background: #b91c1c;
-}
-
-.hidden {
-    display: none !important;
-}
-
-/* PIN */
-
-#pinScreen {
-    width: 92%;
-    max-width: 400px;
-    background: #1f2937;
-    padding: 30px;
-    border-radius: 18px;
-    box-shadow: 0 10px 40px rgba(0,0,0,.4);
-}
-
-#pinScreen h1 {
-    margin-bottom: 25px;
-}
-
-.pinError {
-    color: #f87171;
-    text-align: center;
-    margin-top: 12px;
-}
-
-/* STATS */
-
-.stats {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 8px;
-    margin-top: 20px;
-}
-
-.stat {
-    background: #374151;
-    padding: 12px 5px;
-    border-radius: 10px;
-    text-align: center;
-    font-size: 13px;
-}
-
-.stat strong {
-    display: block;
-    margin-top: 5px;
-    font-size: 21px;
-}
-
-/* PROGRESSION */
-
-.progress-container {
-    height: 20px;
-    margin-top: 20px;
-    background: #374151;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.progress {
-    width: 0%;
-    height: 100%;
-    background: #22c55e;
-    transition: width .15s;
-}
-
-.progressText {
-    text-align: center;
-    margin-top: 7px;
-    color: #9ca3af;
-}
-
-/* LOG */
-
-.logs {
-    height: 200px;
-    margin-top: 20px;
-    padding: 12px;
-    background: #111827;
-    border-radius: 10px;
-    overflow-y: auto;
-    font-family: monospace;
-    font-size: 13px;
-}
-
-.info {
-    margin-top: 15px;
-    text-align: center;
-    color: #9ca3af;
-    font-size: 13px;
-}
-
-@media(max-width:600px) {
-    .stats {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
+* { box-sizing: border-box; font-family: "Courier New", monospace; }
+body { margin: 0; padding: 20px; min-height: 100vh; background: #0b0f19; color: #f8fafc; }
+main { max-width: 800px; margin: 20px auto; }
+.card { background: #151d2a; border: 1px solid #2d3748; border-radius: 16px; padding: 24px; box-shadow: 0 12px 30px #0005; }
+h1, h2 { color: #38bdf8; overflow-wrap: anywhere; }
+h1 { font-size: 23px; }
+h2 { font-size: 17px; margin-top: 24px; }
+p, small { color: #94a3b8; line-height: 1.6; }
+[hidden] { display: none !important; }
+label { display: block; margin: 16px 0 7px; font-weight: bold; }
+input, select { width: 100%; min-width: 0; padding: 11px; color: #f8fafc; background: #0b0f19; border: 1px solid #475569; border-radius: 8px; }
+input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid #38bdf8; outline-offset: 2px; }
+.color-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 24px 0; }
+.color-square { width: 100%; aspect-ratio: 1; padding: 0; border: 1px solid #ffffff24; border-radius: 10px; cursor: pointer; transition: transform .12s, border-color .12s; }
+.color-square:hover { transform: scale(1.025); }
+.color-square.selected { border: 2px solid #fff; box-shadow: 0 0 0 1px #38bdf8; }
+.c1 { background: #ef4444; } .c2 { background: #3b82f6; } .c3 { background: #22c55e; }
+.c4 { background: #eab308; } .c5 { background: #a855f7; } .c6 { background: #ec4899; }
+.c7 { background: #f97316; } .c8 { background: #06b6d4; } .c9 { background: #64748b; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0; }
+button.action { flex: 1; min-width: 120px; padding: 12px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; }
+button.action:disabled { opacity: .45; cursor: not-allowed; }
+.reset, .stop { background: #dc2626; } .verify, .start { background: #16a34a; }
+.neutral { background: #475569; } .download { background: #2563eb; }
+button.action:hover:not(:disabled) { filter: brightness(1.1); }
+.status { min-height: 24px; margin: 14px 0; font-weight: bold; line-height: 1.5; overflow-wrap: anywhere; }
+.success { color: #4ade80; } .error { color: #f87171; } .info { color: #38bdf8; }
+.config-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.mode-box { margin: 18px 0; padding: 16px; background: #0b0f19; border: 1px solid #334155; border-radius: 10px; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 22px 0; }
+.stat { padding: 14px 6px; text-align: center; background: #0b0f19; border: 1px solid #263448; border-radius: 10px; overflow-wrap: anywhere; }
+.stat strong { display: block; margin-top: 8px; font-size: 25px; }
+.progress-section { margin: 20px 0; padding: 15px; background: #0b0f19; border: 1px solid #263448; border-radius: 10px; }
+.progress-heading { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 10px; font-size: 13px; }
+.progress-heading span:last-child { color: #38bdf8; white-space: nowrap; }
+progress { display: block; width: 100%; height: 12px; appearance: none; -webkit-appearance: none; border: none; border-radius: 20px; overflow: hidden; background: #263448; }
+progress::-webkit-progress-bar { background: #263448; border-radius: 20px; }
+progress::-webkit-progress-value { background: #38bdf8; border-radius: 20px; transition: width .2s ease; }
+progress::-moz-progress-bar { background: #38bdf8; border-radius: 20px; }
+#progressDetail { display: block; margin-top: 8px; font-size: 12px; color: #94a3b8; }
+#log { max-height: 320px; overflow: auto; padding: 14px; background: #080c14; border-radius: 8px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; line-height: 1.7; }
+@media (max-width: 480px) { body { padding: 10px; } main { margin: 5px auto; } .card { padding: 16px; } .config-grid { grid-template-columns: 1fr; } .stats { gap: 6px; } .stat strong { font-size: 20px; } }
 </style>
 </head>
-
 <body>
+<main>
+<section id="login" class="card">
+  <h1>SÉCURITÉ COULEURS</h1>
+  <p>Clique sur les cinq couleurs dans le bon ordre.</p>
+  <div class="color-grid" aria-label="Séquence de couleurs">
+    <button type="button" class="color-square c1" data-color="1" aria-label="Rouge"></button>
+    <button type="button" class="color-square c2" data-color="2" aria-label="Bleu"></button>
+    <button type="button" class="color-square c3" data-color="3" aria-label="Vert"></button>
+    <button type="button" class="color-square c4" data-color="4" aria-label="Jaune"></button>
+    <button type="button" class="color-square c5" data-color="5" aria-label="Violet"></button>
+    <button type="button" class="color-square c6" data-color="6" aria-label="Rose"></button>
+    <button type="button" class="color-square c7" data-color="7" aria-label="Orange"></button>
+    <button type="button" class="color-square c8" data-color="8" aria-label="Cyan"></button>
+    <button type="button" class="color-square c9" data-color="9" aria-label="Gris ardoise"></button>
+  </div>
+  <div class="actions">
+    <button type="button" class="action reset" id="resetColors">Réinitialiser</button>
+    <button type="button" class="action verify" id="verifyColors">Vérifier</button>
+  </div>
+  <div id="loginStatus" class="status" role="status" aria-live="polite"></div>
+</section>
 
+<section id="tester" class="card" hidden>
+  <h1>TESTEUR DE REQUÊTES HTTP</h1>
+  <p>Utilise cet outil uniquement sur un serveur que tu possèdes ou que tu es autorisé à tester.</p>
+  <label for="url">URL du serveur</label>
+  <input id="url" type="url" placeholder="https://ton-serveur.example/health">
 
-<!-- ========================= -->
-<!-- ÉCRAN PIN -->
-<!-- ========================= -->
+  <label for="mode">Mode de test</label>
+  <select id="mode">
+    <option value="normal">Test normal</option>
+    <option value="scheduled">Test programmé</option>
+  </select>
 
-<div id="pinScreen">
+  <div id="normalSettings" class="mode-box">
+    <h2>Test normal</h2>
+    <label for="requestCount">Nombre de requêtes</label>
+    <input id="requestCount" type="number" min="1" max="100" value="10">
+    <p>Les requêtes sont envoyées une par une.</p>
+  </div>
 
-    <h1>🔐 Accès</h1>
-
-    <div class="field">
-
-        <label for="pin">
-            Code PIN
-        </label>
-
-        <input
-            id="pin"
-            type="password"
-            inputmode="numeric"
-            maxlength="20"
-            placeholder="Entrez le code PIN"
-        >
-
+  <div id="scheduledSettings" class="mode-box" hidden>
+    <h2>Test programmé</h2>
+    <div class="config-grid">
+      <div>
+        <label for="requestsPerPass">Requêtes par passage</label>
+        <input id="requestsPerPass" type="number" min="1" max="10" value="3">
+      </div>
+      <div>
+        <label for="passCount">Nombre de passages</label>
+        <input id="passCount" type="number" min="1" max="100" value="3">
+      </div>
     </div>
-
-    <button id="pinButton">
-        🔓 Entrer
-    </button>
-
-    <div
-        id="pinError"
-        class="pinError hidden"
-    >
-        ❌ Code incorrect
+    <label for="scheduleMinutes">Délai entre les passages (minutes)</label>
+    <input id="scheduleMinutes" type="number" min="15" max="1440" value="15">
+    <h2>Plage horaire</h2>
+    <div class="config-grid">
+      <div>
+        <label for="windowStart">Heure de début</label>
+        <input id="windowStart" type="time" value="08:00">
+      </div>
+      <div>
+        <label for="windowEnd">Heure de fin</label>
+        <input id="windowEnd" type="time" value="18:00">
+      </div>
     </div>
-
-</div>
-
-
-<!-- ========================= -->
-<!-- APPLICATION -->
-<!-- ========================= -->
-
-<div
-    id="app"
-    class="container hidden"
->
-
-    <h1>🧪 Testeur de requêtes</h1>
-
-
-    <!-- SITE -->
-
-    <div class="field">
-
-        <label for="url">
-            🌐 Site à tester
-        </label>
-
-        <input
-            type="url"
-            id="url"
-            value="http://127.0.0.1:5000/"
-            placeholder="https://ton-serveur.onrender.com/"
-        >
-
-    </div>
-
-
-    <!-- MODE -->
-
-    <div class="field">
-
-        <label for="mode">
-            ⚙️ Mode de test
-        </label>
-
-        <select id="mode">
-
-            <option value="nombre">
-                🔢 Nombre de requêtes
-            </option>
-
-            <option value="duree">
-                ⏱️ Durée du test
-            </option>
-
-        </select>
-
-    </div>
-
-
-    <!-- MODE NOMBRE -->
-
-    <div id="modeNombre">
-
-        <div class="field">
-
-            <label for="nombre">
-                🔢 Nombre de requêtes
-            </label>
-
-            <input
-                type="number"
-                id="nombre"
-                value="100"
-                min="1"
-                max="10000"
-            >
-
-        </div>
-
-    </div>
-
-
-    <!-- MODE DURÉE -->
-
-    <div
-        id="modeDuree"
-        class="hidden"
-    >
-
-        <div class="field">
-
-            <label for="duree">
-                ⌛ Durée du test (secondes)
-            </label>
-
-            <input
-                type="number"
-                id="duree"
-                value="30"
-                min="1"
-                max="3600"
-            >
-
-        </div>
-
-    </div>
-
-
-    <!-- DÉLAI -->
-
-    <div class="field">
-
-        <label for="temps">
-            ⏱️ Temps entre les requêtes (ms)
-        </label>
-
-        <input
-            type="number"
-            id="temps"
-            value="100"
-            min="10"
-            max="60000"
-        >
-
-    </div>
-
-
-    <!-- BOUTONS -->
-
-    <button id="start">
-        ▶️ Démarrer
-    </button>
-
-    <button
-        id="stop"
-        class="stop hidden"
-    >
-        ⛔ Arrêter
-    </button>
-
-
-    <!-- STATS -->
-
-    <div class="stats">
-
-        <div class="stat">
-            Total
-            <strong id="total">0</strong>
-        </div>
-
-        <div class="stat">
-            Acceptées
-            <strong id="acceptees">0</strong>
-        </div>
-
-        <div class="stat">
-            426
-            <strong id="status426">0</strong>
-        </div>
-
-        <div class="stat">
-            429
-            <strong id="status429">0</strong>
-        </div>
-
-        <div class="stat">
-            Erreurs
-            <strong id="erreurs">0</strong>
-        </div>
-
-    </div>
-
-
-    <!-- PROGRESSION -->
-
-    <div class="progress-container">
-
-        <div
-            class="progress"
-            id="progress"
-        ></div>
-
-    </div>
-
-    <div
-        class="progressText"
-        id="progressText"
-    >
-        0 %
-    </div>
-
-
-    <!-- LOG -->
-
-    <div
-        class="logs"
-        id="logs"
-    ></div>
-
-
-    <div class="info">
-        Utilise uniquement un serveur que tu contrôles ou que tu es autorisé à tester.
-    </div>
-
-</div>
-
+    <p>Les tests ne démarrent que pendant cette plage, selon l’heure locale de l’appareil. Une plage comme 22:00–06:00 traverse minuit.</p>
+  </div>
+
+  <label for="interval">Intervalle entre les débuts de requêtes (millisecondes)</label>
+  <input id="interval" type="number" min="500" max="60000" value="2000">
+  <p id="limitsInfo"></p>
+
+  <div class="stats">
+    <div class="stat">Total<strong id="total">0</strong></div>
+    <div class="stat">Acceptées<strong id="accepted">0</strong></div>
+    <div class="stat">Refusées<strong id="refused">0</strong></div>
+  </div>
+
+  <div class="progress-section">
+    <div class="progress-heading"><span>Progression du test</span><span id="progressPercent">0 %</span></div>
+    <progress id="progressBar" max="100" value="0">0%</progress>
+    <span id="progressDetail">Aucun test en cours.</span>
+  </div>
+
+  <div class="actions">
+    <button type="button" class="action start" id="start">Lancer le test</button>
+    <button type="button" class="action stop" id="stop" disabled>Arrêter</button>
+  </div>
+  <div class="actions">
+    <button type="button" class="action neutral" id="clear">Effacer le journal</button>
+    <button type="button" class="action download" id="export">Exporter le rapport</button>
+  </div>
+  <div id="testStatus" class="status info" role="status" aria-live="polite">En attente.</div>
+  <h2>Journal des résultats</h2>
+  <div id="log">Aucun test lancé.</div>
+</section>
+</main>
 
 <script>
+// CONFIGURATION : tests séquentiels et limites modérées.
+const CONFIG = {
+  MAX_REQUESTS_PER_TEST: 100000000,
+  MAX_REQUESTS_PER_SCHEDULED_PASS: 100000,
+  MAX_SCHEDULED_PASSES: 100,
+  MIN_INTERVAL_MS: 1,
+  MAX_INTERVAL_MS: 2000,
+  REQUEST_TIMEOUT_MS: 1,
+  MIN_SCHEDULE_INTERVAL_MINUTES: 1,
+  MAX_SCHEDULE_INTERVAL_MINUTES: 1440,
+  DEFAULT_REQUESTS: 10,
+  DEFAULT_INTERVAL_MS: 2000,
+  DEFAULT_REQUESTS_PER_PASS: 3,
+  DEFAULT_PASS_COUNT: 3,
+  DEFAULT_SCHEDULE_MINUTES: 15
+};
 
-/* =====================================
-   CONFIGURATION
-===================================== */
+// Rouge → Violet → Gris ardoise → Vert → Bleu.
+const SECRET_SEQUENCE = [1, 5, 9, 3, 2];
+const login = document.getElementById("login");
+const tester = document.getElementById("tester");
+const loginStatus = document.getElementById("loginStatus");
+const colorButtons = [...document.querySelectorAll(".color-square")];
+let selectedColors = [];
 
-const PIN = "pantalontulipefleurs";
+function resetColors() {
+  selectedColors = [];
+  colorButtons.forEach(button => button.classList.remove("selected"));
+  loginStatus.textContent = "";
+  loginStatus.className = "status";
+}
 
+colorButtons.forEach(button => {
+  button.addEventListener("click", () => {
+    if (selectedColors.length >= SECRET_SEQUENCE.length) return;
+    selectedColors.push(Number(button.dataset.color));
+    button.classList.add("selected");
+    loginStatus.textContent = "";
+    loginStatus.className = "status";
+  });
+});
 
-/* =====================================
-   ELEMENTS
-===================================== */
+document.getElementById("resetColors").addEventListener("click", resetColors);
+document.getElementById("verifyColors").addEventListener("click", () => {
+  const correct = selectedColors.length === SECRET_SEQUENCE.length &&
+    selectedColors.every((value, index) => value === SECRET_SEQUENCE[index]);
+  if (!correct) {
+    resetColors();
+    loginStatus.textContent = "ACCÈS REFUSÉ ✖";
+    loginStatus.className = "status error";
+    return;
+  }
+  loginStatus.textContent = "ACCÈS AUTORISÉ ✔";
+  loginStatus.className = "status success";
+  login.hidden = true;
+  tester.hidden = false;
+  initializeConfig();
+  updateModeVisibility();
+});
 
-const pinScreen =
-    document.getElementById("pinScreen");
+const urlInput = document.getElementById("url");
+const modeInput = document.getElementById("mode");
+const countInput = document.getElementById("requestCount");
+const requestsPerPassInput = document.getElementById("requestsPerPass");
+const passCountInput = document.getElementById("passCount");
+const scheduleMinutesInput = document.getElementById("scheduleMinutes");
+const windowStartInput = document.getElementById("windowStart");
+const windowEndInput = document.getElementById("windowEnd");
+const intervalInput = document.getElementById("interval");
+const normalSettings = document.getElementById("normalSettings");
+const scheduledSettings = document.getElementById("scheduledSettings");
+const totalEl = document.getElementById("total");
+const acceptedEl = document.getElementById("accepted");
+const refusedEl = document.getElementById("refused");
+const testStatus = document.getElementById("testStatus");
+const logEl = document.getElementById("log");
+const progressBar = document.getElementById("progressBar");
+const progressPercent = document.getElementById("progressPercent");
+const progressDetail = document.getElementById("progressDetail");
+const startButton = document.getElementById("start");
+const stopButton = document.getElementById("stop");
 
-const pinInput =
-    document.getElementById("pin");
+let total = 0, accepted = 0, refused = 0;
+let running = false, stopRequested = false;
+let logEntries = [];
+let activeController = null;
+let delayTimer = null;
+let delayResolver = null;
+let runCompleted = 0, runTarget = 0;
 
-const pinButton =
-    document.getElementById("pinButton");
+function initializeConfig() {
+  countInput.max = String(CONFIG.MAX_REQUESTS_PER_TEST);
+  countInput.value = String(CONFIG.DEFAULT_REQUESTS);
+  requestsPerPassInput.max = String(CONFIG.MAX_REQUESTS_PER_SCHEDULED_PASS);
+  requestsPerPassInput.value = String(CONFIG.DEFAULT_REQUESTS_PER_PASS);
+  passCountInput.max = String(CONFIG.MAX_SCHEDULED_PASSES);
+  passCountInput.value = String(CONFIG.DEFAULT_PASS_COUNT);
+  scheduleMinutesInput.min = String(CONFIG.MIN_SCHEDULE_INTERVAL_MINUTES);
+  scheduleMinutesInput.max = String(CONFIG.MAX_SCHEDULE_INTERVAL_MINUTES);
+  scheduleMinutesInput.value = String(CONFIG.DEFAULT_SCHEDULE_MINUTES);
+  intervalInput.min = String(CONFIG.MIN_INTERVAL_MS);
+  intervalInput.max = String(CONFIG.MAX_INTERVAL_MS);
+  intervalInput.value = String(CONFIG.DEFAULT_INTERVAL_MS);
+  document.getElementById("limitsInfo").textContent =
+    `Configuration : ${CONFIG.MAX_REQUESTS_PER_TEST} requêtes maximum par test normal ; ` +
+    `${CONFIG.MAX_REQUESTS_PER_SCHEDULED_PASS} par passage programmé ; ` +
+    `intervalle entre débuts de requêtes de ${CONFIG.MIN_INTERVAL_MS} à ${CONFIG.MAX_INTERVAL_MS} ms.`;
+  updateStats();
+  updateProgress();
+}
 
-const pinError =
-    document.getElementById("pinError");
+function updateModeVisibility() {
+  const scheduled = modeInput.value === "scheduled";
+  normalSettings.hidden = scheduled;
+  scheduledSettings.hidden = !scheduled;
+}
+modeInput.addEventListener("change", updateModeVisibility);
 
-const app =
-    document.getElementById("app");
+function updateStats() {
+  totalEl.textContent = total;
+  acceptedEl.textContent = accepted;
+  refusedEl.textContent = refused;
+}
 
-const mode =
-    document.getElementById("mode");
+function updateProgress() {
+  const percent = runTarget > 0 ? Math.min(100, Math.round(runCompleted / runTarget * 100)) : 0;
+  progressBar.value = percent;
+  progressPercent.textContent = `${percent} %`;
+  progressDetail.textContent = runTarget > 0
+    ? `${runCompleted} / ${runTarget} requêtes terminées pour ce test`
+    : "Aucun test en cours.";
+}
 
-const modeNombre =
-    document.getElementById("modeNombre");
+function log(message) {
+  logEntries.push(`[${new Date().toLocaleString()}] ${message}`);
+  if (logEntries.length > 500) logEntries.shift();
+  logEl.textContent = logEntries.join("\n");
+  logEl.scrollTop = logEl.scrollHeight;
+}
 
-const modeDuree =
-    document.getElementById("modeDuree");
+function waitFor(ms) {
+  return new Promise(resolve => {
+    delayResolver = resolve;
+    delayTimer = setTimeout(() => {
+      delayTimer = null;
+      delayResolver = null;
+      resolve();
+    }, Math.max(0, ms));
+  });
+}
 
-const urlInput =
-    document.getElementById("url");
+function stopTest() {
+  if (!running) return;
+  stopRequested = true;
+  if (activeController) activeController.abort();
+  if (delayTimer !== null) {
+    clearTimeout(delayTimer);
+    delayTimer = null;
+    if (delayResolver) {
+      const resolve = delayResolver;
+      delayResolver = null;
+      resolve();
+    }
+  }
+  testStatus.textContent = "Arrêt demandé…";
+  testStatus.className = "status info";
+}
+startButton.addEventListener("click", runTest);
+stopButton.addEventListener("click", stopTest);
 
-const nombreInput =
-    document.getElementById("nombre");
+function parseTime(value) {
+  const parts = value.split(":").map(Number);
+  if (parts.length !== 2 || !Number.isInteger(parts[0]) || !Number.isInteger(parts[1]) ||
+      parts[0] < 0 || parts[0] > 23 || parts[1] < 0 || parts[1] > 59) {
+    throw new Error("Saisis une plage horaire valide.");
+  }
+  return parts[0] * 60 + parts[1];
+}
 
-const dureeInput =
-    document.getElementById("duree");
+function isWithinWindow(start, end) {
+  const now = new Date();
+  const minutes = now.getHours() * 60 + now.getMinutes();
+  if (start === end) return false;
+  if (start < end) return minutes >= start && minutes < end;
+  return minutes >= start || minutes < end;
+}
 
-const tempsInput =
-    document.getElementById("temps");
+function millisecondsUntilNextWindow(start, end) {
+  const now = new Date();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  const target = new Date(now);
+  target.setHours(Math.floor(start / 60), start % 60, 0, 0);
+  if (start < end && currentMinutes >= end) target.setDate(target.getDate() + 1);
+  return Math.max(1000, target.getTime() - now.getTime());
+}
 
-const startButton =
-    document.getElementById("start");
+async function waitForWindow(start, end) {
+  while (!stopRequested && !isWithinWindow(start, end)) {
+    const delay = millisecondsUntilNextWindow(start, end);
+    const nextOpen = new Date(Date.now() + delay);
+    testStatus.textContent = `Hors plage horaire. Reprise prévue vers ${nextOpen.toLocaleString()}.`;
+    testStatus.className = "status info";
+    log(`Hors plage horaire. Attente jusqu'à environ ${nextOpen.toLocaleString()}.`);
+    await waitFor(delay + 100);
+  }
+  return !stopRequested;
+}
 
-const stopButton =
-    document.getElementById("stop");
+async function performRequest(target, label) {
+  if (stopRequested) return false;
+  const controller = new AbortController();
+  activeController = controller;
+  const startedAt = performance.now();
+  let timeoutId = null;
+  let timedOut = false;
+  total++;
+  updateStats();
 
-const totalElement =
-    document.getElementById("total");
+  try {
+    timeoutId = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, CONFIG.REQUEST_TIMEOUT_MS);
 
-const accepteesElement =
-    document.getElementById("acceptees");
+    const response = await fetch(target.href, {
+      method: "GET",
+      mode: "cors",
+      cache: "no-store",
+      signal: controller.signal
+    });
+    const elapsed = Math.round(performance.now() - startedAt);
 
-const status426Element =
-    document.getElementById("status426");
-
-const status429Element =
-    document.getElementById("status429");
-
-const erreursElement =
-    document.getElementById("erreurs");
-
-const progress =
-    document.getElementById("progress");
-
-const progressText =
-    document.getElementById("progressText");
-
-const logs =
-    document.getElementById("logs");
-
-
-/* =====================================
-   VARIABLES
-===================================== */
-
-let enCours = false;
-
-let total = 0;
-let acceptees = 0;
-let status426 = 0;
-let status429 = 0;
-let erreurs = 0;
-
-
-/* =====================================
-   PIN
-===================================== */
-
-function verifierPIN() {
-
-    if (pinInput.value === PIN) {
-
-        pinScreen.classList.add("hidden");
-
-        app.classList.remove("hidden");
-
+    if (response.ok) {
+      accepted++;
+      log(`${label} : HTTP ${response.status} — acceptée — ${elapsed} ms`);
     } else {
-
-        pinError.classList.remove("hidden");
-
-        pinInput.value = "";
-
-        pinInput.focus();
-
+      refused++;
+      log(`${label} : HTTP ${response.status} — refusée — ${elapsed} ms`);
     }
-
-}
-
-
-pinButton.addEventListener(
-    "click",
-    verifierPIN
-);
-
-
-pinInput.addEventListener(
-    "keydown",
-    event => {
-
-        if (event.key === "Enter") {
-            verifierPIN();
-        }
-
+  } catch (error) {
+    if (stopRequested) {
+      total--;
+      log(`${label} : requête interrompue par l'utilisateur.`);
+      return false;
     }
-);
+    refused++;
+    log(timedOut
+      ? `${label} : délai dépassé (${CONFIG.REQUEST_TIMEOUT_MS} ms).`
+      : `${label} : erreur réseau ou blocage CORS.`);
+  } finally {
+    if (timeoutId !== null) clearTimeout(timeoutId);
+    if (activeController === controller) activeController = null;
+    updateStats();
+  }
 
+  runCompleted++;
+  updateProgress();
+  return !stopRequested;
+}
 
-/* =====================================
-   CHANGEMENT DE MODE
-===================================== */
-
-mode.addEventListener(
-    "change",
-    () => {
-
-        if (mode.value === "nombre") {
-
-            modeNombre.classList.remove("hidden");
-
-            modeDuree.classList.add("hidden");
-
-        } else {
-
-            modeNombre.classList.add("hidden");
-
-            modeDuree.classList.remove("hidden");
-
-        }
-
+async function runBatch(target, count, interval, label, scheduleWindow) {
+  for (let index = 0; index < count; index++) {
+    if (stopRequested) return false;
+    if (scheduleWindow) {
+      const allowed = await waitForWindow(scheduleWindow.start, scheduleWindow.end);
+      if (!allowed) return false;
     }
-);
+    if (stopRequested) return false;
 
+    // L'intervalle est mesuré d'un départ de requête au suivant.
+    const requestStartedAt = performance.now();
+    const ok = await performRequest(target, `${label}, requête ${index + 1}/${count}`);
+    if (!ok || stopRequested) return false;
 
-/* =====================================
-   ATTENDRE
-===================================== */
-
-function attendre(ms) {
-
-    return new Promise(
-        resolve => setTimeout(resolve, ms)
-    );
-
+    if (index < count - 1) {
+      const elapsed = performance.now() - requestStartedAt;
+      const remaining = interval - elapsed;
+      if (remaining > 0) await waitFor(remaining);
+    }
+  }
+  return !stopRequested;
 }
 
+async function runTest() {
+  if (running) return;
+  let target;
+  try {
+    target = new URL(urlInput.value.trim());
+    if (!["http:", "https:"].includes(target.protocol) || !target.hostname) {
+      throw new Error("Saisis une URL HTTP ou HTTPS valide.");
+    }
+  } catch (error) {
+    testStatus.textContent = "URL invalide : " + error.message;
+    testStatus.className = "status error";
+    return;
+  }
 
-/* =====================================
-   LOG
-===================================== */
+  const rawInterval = Number(intervalInput.value);
+  if (!Number.isFinite(rawInterval) || rawInterval < 0) {
+    testStatus.textContent = "Intervalle invalide.";
+    testStatus.className = "status error";
+    return;
+  }
+  const interval = Math.max(CONFIG.MIN_INTERVAL_MS, Math.min(rawInterval, CONFIG.MAX_INTERVAL_MS));
+  intervalInput.value = String(interval);
 
-function ajouterLog(message) {
+  const scheduled = modeInput.value === "scheduled";
+  let requestCount, passCount = 1, scheduleMinutes = 0, scheduleWindow = null;
 
-    const ligne =
-        document.createElement("div");
-
-    const heure =
-        new Date().toLocaleTimeString();
-
-    ligne.textContent =
-        `[${heure}] ${message}`;
-
-    logs.appendChild(ligne);
-
-    logs.scrollTop =
-        logs.scrollHeight;
-
-}
-
-
-/* =====================================
-   STATS
-===================================== */
-
-function mettreAJour(progression = 0) {
-
-    totalElement.textContent =
-        total;
-
-    accepteesElement.textContent =
-        acceptees;
-
-    status426Element.textContent =
-        status426;
-
-    status429Element.textContent =
-        status429;
-
-    erreursElement.textContent =
-        erreurs;
-
-    const valeur =
-        Math.min(100, Math.max(0, progression));
-
-    progress.style.width =
-        valeur + "%";
-
-    progressText.textContent =
-        Math.round(valeur) + " %";
-
-}
-
-
-/* =====================================
-   RÉINITIALISER
-===================================== */
-
-function resetStats() {
-
-    total = 0;
-    acceptees = 0;
-    status426 = 0;
-    status429 = 0;
-    erreurs = 0;
-
-    logs.innerHTML = "";
-
-    mettreAJour(0);
-
-}
-
-
-/* =====================================
-   UNE REQUÊTE
-===================================== */
-
-async function faireRequete(URL_TEST) {
-
+  if (!scheduled) {
+    const requested = Number(countInput.value);
+    if (!Number.isInteger(requested) || requested < 1) {
+      testStatus.textContent = "Le nombre de requêtes doit être un entier positif.";
+      testStatus.className = "status error";
+      return;
+    }
+    requestCount = Math.min(requested, CONFIG.MAX_REQUESTS_PER_TEST);
+    countInput.value = String(requestCount);
+  } else {
+    const requestedPerPass = Number(requestsPerPassInput.value);
+    const requestedPasses = Number(passCountInput.value);
+    const requestedMinutes = Number(scheduleMinutesInput.value);
+    if (!Number.isInteger(requestedPerPass) || requestedPerPass < 1 ||
+        !Number.isInteger(requestedPasses) || requestedPasses < 1 ||
+        !Number.isFinite(requestedMinutes) || requestedMinutes < 0) {
+      testStatus.textContent = "Vérifie les paramètres du test programmé.";
+      testStatus.className = "status error";
+      return;
+    }
     try {
+      const start = parseTime(windowStartInput.value);
+      const end = parseTime(windowEndInput.value);
+      if (start === end) throw new Error("L'heure de début et l'heure de fin doivent être différentes.");
+      scheduleWindow = { start, end };
+    } catch (error) {
+      testStatus.textContent = error.message;
+      testStatus.className = "status error";
+      return;
+    }
+    requestCount = Math.min(requestedPerPass, CONFIG.MAX_REQUESTS_PER_SCHEDULED_PASS);
+    passCount = Math.min(requestedPasses, CONFIG.MAX_SCHEDULED_PASSES);
+    scheduleMinutes = Math.max(CONFIG.MIN_SCHEDULE_INTERVAL_MINUTES,
+      Math.min(requestedMinutes, CONFIG.MAX_SCHEDULE_INTERVAL_MINUTES));
+    requestsPerPassInput.value = String(requestCount);
+    passCountInput.value = String(passCount);
+    scheduleMinutesInput.value = String(scheduleMinutes);
+  }
 
-        const reponse =
-            await fetch(
-                URL_TEST,
-                {
-                    method: "GET",
-                    cache: "no-store"
-                }
-            );
+  runCompleted = 0;
+  runTarget = requestCount * passCount;
+  updateProgress();
+  running = true;
+  stopRequested = false;
 
-        total++;
+  startButton.disabled = true;
+  stopButton.disabled = false;
+  [urlInput, modeInput, countInput, requestsPerPassInput, passCountInput,
+   scheduleMinutesInput, windowStartInput, windowEndInput, intervalInput]
+    .forEach(input => input.disabled = true);
 
+  log(`Démarrage du test vers ${target.href}.`);
+  log(`Mode : ${scheduled ? "programmé" : "normal"}. Intervalle demandé : ${interval} ms entre les débuts de requêtes.`);
+  if (scheduled) log(`Plage horaire locale : ${windowStartInput.value}–${windowEndInput.value}.`);
 
-        if (reponse.status === 429) {
-
-            status429++;
-
-            ajouterLog(
-                `🔴 ${total} → 429`
-            );
-
+  try {
+    if (!scheduled) {
+      testStatus.textContent = "Test normal en cours…";
+      testStatus.className = "status info";
+      await runBatch(target, requestCount, interval, "Test normal", null);
+    } else {
+      for (let pass = 1; pass <= passCount; pass++) {
+        if (stopRequested) break;
+        const allowed = await waitForWindow(scheduleWindow.start, scheduleWindow.end);
+        if (!allowed) break;
+        testStatus.textContent = `Passage ${pass}/${passCount} en cours…`;
+        testStatus.className = "status info";
+        log(`Début du passage ${pass}/${passCount}.`);
+        const completed = await runBatch(target, requestCount, interval,
+          `Passage ${pass}/${passCount}`, scheduleWindow);
+        if (!completed || stopRequested) break;
+        log(`Passage ${pass}/${passCount} terminé.`);
+        if (pass < passCount) {
+          testStatus.textContent = `Passage terminé. Attente de ${scheduleMinutes} minute(s) avant le suivant.`;
+          log(`Attente de ${scheduleMinutes} minute(s) avant le passage suivant.`);
+          await waitFor(scheduleMinutes * 60 * 1000);
         }
-
-        else if (reponse.status === 426) {
-
-            status426++;
-
-            ajouterLog(
-                `🟠 ${total} → 426`
-            );
-
-        }
-
-        else if (reponse.ok) {
-
-            acceptees++;
-
-            ajouterLog(
-                `🟢 ${total} → ${reponse.status}`
-            );
-
-        }
-
-        else {
-
-            erreurs++;
-
-            ajouterLog(
-                `⚠️ ${total} → ${reponse.status}`
-            );
-
-        }
-
+      }
     }
 
-    catch (erreur) {
-
-        total++;
-
-        erreurs++;
-
-        ajouterLog(
-            `⚠️ ${total} → erreur réseau`
-        );
-
+    if (stopRequested) {
+      testStatus.textContent = "Test arrêté.";
+      testStatus.className = "status info";
+      log("Test arrêté par l'utilisateur.");
+    } else {
+      testStatus.textContent = scheduled ? "Tous les passages programmés sont terminés." : "Test terminé.";
+      testStatus.className = "status success";
+      log("Fin du test.");
     }
-
+  } catch (error) {
+    testStatus.textContent = "Erreur : " + (error.message || "erreur inconnue");
+    testStatus.className = "status error";
+    log("Erreur : " + (error.message || "erreur inconnue"));
+  } finally {
+    running = false;
+    activeController = null;
+    startButton.disabled = false;
+    stopButton.disabled = true;
+    [urlInput, modeInput, countInput, requestsPerPassInput, passCountInput,
+     scheduleMinutesInput, windowStartInput, windowEndInput, intervalInput]
+      .forEach(input => input.disabled = false);
+    updateStats();
+    updateProgress();
+  }
 }
 
-
-/* =====================================
-   LANCER LE TEST
-===================================== */
-
-async function lancerTest() {
-
-    if (enCours) {
-        return;
-    }
-
-
-    const URL_TEST =
-        urlInput.value.trim();
-
-
-    const delai =
-        parseInt(tempsInput.value);
-
-
-    if (!URL_TEST) {
-
-        alert(
-            "Entre l'adresse du serveur à tester."
-        );
-
-        return;
-    }
-
-
-    if (
-        isNaN(delai) ||
-        delai < 0
-    ) {
-
-        alert(
-            "Le délai doit être d'au moins 0.1ms."
-        );
-
-        return;
-    }
-
-
-    resetStats();
-
-    enCours = true;
-
-    startButton.classList.add("hidden");
-
-    stopButton.classList.remove("hidden");
-
-
-    ajouterLog(
-        `🌐 ${URL_TEST}`
-    );
-
-
-    ajouterLog(
-        `⏱️ Intervalle : ${delai} ms`
-    );
-
-
-    /* ==========================
-       MODE NOMBRE
-    ========================== */
-
-    if (mode.value === "nombre") {
-
-        const objectif =
-            parseInt(nombreInput.value);
-
-
-        if (
-            isNaN(objectif) ||
-            objectif < 1 ||
-            objectif > 10000
-        ) {
-
-            alert(
-                "Le nombre doit être compris entre 1 et 10 000."
-            );
-
-            terminerTest();
-
-            return;
-        }
-
-
-        ajouterLog(
-            `🔢 Objectif : ${objectif} requêtes`
-        );
-
-
-        while (
-            enCours &&
-            total < objectif
-        ) {
-
-            await faireRequete(
-                URL_TEST
-            );
-
-
-            const progression =
-                (total / objectif) * 100;
-
-
-            mettreAJour(
-                progression
-            );
-
-
-            if (
-                enCours &&
-                total < objectif
-            ) {
-
-                await attendre(
-                    delai
-                );
-
-            }
-
-        }
-
-    }
-
-
-    /* ==========================
-       MODE DURÉE
-    ========================== */
-
-    else {
-
-        const duree =
-            parseInt(dureeInput.value);
-
-
-        if (
-            isNaN(duree) ||
-            duree < 1 ||
-            duree > 3600
-        ) {
-
-            alert(
-                "La durée doit être comprise entre 1 et 3600 secondes."
-            );
-
-            terminerTest();
-
-            return;
-        }
-
-
-        const debut =
-            Date.now();
-
-        const fin =
-            debut + duree * 1000;
-
-
-        ajouterLog(
-            `⌛ Durée : ${duree} secondes`
-        );
-
-
-        while (
-            enCours &&
-            Date.now() < fin
-        ) {
-
-            await faireRequete(
-                URL_TEST
-            );
-
-
-            const maintenant =
-                Date.now();
-
-
-            const progression =
-                ((maintenant - debut) /
-                (duree * 1000)) * 100;
-
-
-            mettreAJour(
-                Math.min(100, progression)
-            );
-
-
-            if (
-                enCours &&
-                Date.now() < fin
-            ) {
-
-                await attendre(
-                    delai
-                );
-
-            }
-
-        }
-
-    }
-
-
-    if (enCours) {
-
-        mettreAJour(100);
-
-        ajouterLog(
-            "🏁 Test terminé."
-        );
-
-    }
-
-
-    terminerTest();
-
-}
-
-
-/* =====================================
-   TERMINER
-===================================== */
-
-function terminerTest() {
-
-    enCours = false;
-
-    startButton.classList.remove("hidden");
-
-    stopButton.classList.add("hidden");
-
-}
-
-
-/* =====================================
-   DÉMARRER
-===================================== */
-
-startButton.addEventListener(
-    "click",
-    lancerTest
-);
-
-
-/* =====================================
-   ARRÊTER
-===================================== */
-
-stopButton.addEventListener(
-    "click",
-    () => {
-
-        if (!enCours) {
-            return;
-        }
-
-        enCours = false;
-
-        ajouterLog(
-            "⛔ Test arrêté."
-        );
-
-        mettreAJour();
-
-        terminerTest();
-
-    }
-);
-
+document.getElementById("clear").addEventListener("click", () => {
+  logEntries = [];
+  logEl.textContent = "Journal effacé.";
+});
+
+document.getElementById("export").addEventListener("click", () => {
+  const report = [
+    "RAPPORT DU TESTEUR HTTP",
+    `Date : ${new Date().toLocaleString()}`,
+    `URL : ${urlInput.value}`,
+    `Mode : ${modeInput.value}`,
+    `Total : ${total}`,
+    `Acceptées : ${accepted}`,
+    `Refusées : ${refused}`,
+    `Progression : ${progressPercent.textContent}`,
+    "",
+    ...logEntries
+  ].join("\n");
+  const blob = new Blob([report], { type: "text/plain;charset=utf-8" });
+  const downloadUrl = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = downloadUrl;
+  link.download = "rapport-test-http.txt";
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+});
+
+initializeConfig();
+updateModeVisibility();
 </script>
-
 </body>
 </html>
