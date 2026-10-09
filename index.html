@@ -29,7 +29,7 @@ button.action { flex: 1; min-width: 120px; padding: 12px; border: none; border-r
 button.action:disabled { opacity: .45; cursor: not-allowed; }
 .reset, .stop { background: #dc2626; } .verify, .start { background: #16a34a; }
 .neutral { background: #475569; } .download { background: #2563eb; }
-button.action:hover:not(:disabled) { filter: brightness(1.1); }
+button.action:hover:not-------------disabled) { filter: brightness(1.1); }
 .status { min-height: 24px; margin: 14px 0; font-weight: bold; line-height: 1.5; overflow-wrap: anywhere; }
 .success { color: #4ade80; } .error { color: #f87171; } .info { color: #38bdf8; }
 .config-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
@@ -167,6 +167,30 @@ const CONFIG = {
   DEFAULT_SCHEDULE_MINUTES: 15
 };
 
+// GESTION DU MAINTIEN ÉVEILLÉ (WAKE LOCK API)
+let wakeLock = null;
+
+async function requestWakeLock() {
+  if ('wakeLock' in navigator) {
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      log("Maintien en éveil activé pour l'appareil.");
+      wakeLock.addEventListener('release', () => {
+        wakeLock = null;
+      });
+    } catch (err) {
+      log("Avertissement : impossible d'activer le maintien en éveil (" + err.message + ").");
+    }
+  }
+}
+
+// Réactivation de la veille si l'onglet redevient visible après avoir été masqué
+document.addEventListener('visibilitychange', async () => {
+  if (wakeLock !== null && document.visibilityState === 'visible') {
+    await requestWakeLock();
+  }
+});
+
 // Rouge → Violet → Gris ardoise → Vert → Bleu.
 const SECRET_SEQUENCE = [1, 5, 9, 3, 2];
 const login = document.getElementById("login");
@@ -208,6 +232,9 @@ document.getElementById("verifyColors").addEventListener("click", () => {
   tester.hidden = false;
   initializeConfig();
   updateModeVisibility();
+  
+  // Demande le maintien en éveil dès que l'accès est autorisé
+  requestWakeLock();
 });
 
 const urlInput = document.getElementById("url");
@@ -435,6 +462,10 @@ async function runBatch(target, count, interval, label, scheduleWindow) {
 
 async function runTest() {
   if (running) return;
+  
+  // S'assure que le verrouillage d'écran est bien actif lors du lancement
+  await requestWakeLock();
+
   let target;
   try {
     target = new URL(urlInput.value.trim());
