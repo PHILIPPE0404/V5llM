@@ -6,7 +6,7 @@
 <title>Accès sécurisé — Testeur HTTP AAA</title>
 <!-- Tailwind CSS CDN -->
 <script src="https://cdn.tailwindcss.com"></script>
-<!-- Google Font pour un style Cartoon / AAA moderne -->
+<!-- Google Font -->
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Courier+Prime:wght@700&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; font-family: 'Fredoka', cursive, sans-serif; }
@@ -14,18 +14,47 @@ body {
     margin: 0; 
     padding: 20px; 
     min-height: 100vh; 
-    background: radial-gradient(circle at center, #1e1b4b 0%, #09090b 100%); 
+    background: #020617; 
     color: #f8fafc; 
+    position: relative;
+    overflow-x: hidden;
 }
-main { max-width: 840px; margin: 20px auto; }
 
+/* Canvas d'arrière-plan animé */
+#bgCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+}
+
+main { max-width: 840px; margin: 20px auto; position: relative; z-index: 10; }
+
+/* Effet Verre Foncé (Dark Glassmorphism) */
 .card { 
-    background: #181824; 
-    border: 3px solid #3b82f6; 
-    border-radius: 24px; 
-    padding: 30px; 
-    box-shadow: 0 16px 0 #1e3a8a, 0 20px 40px rgba(0,0,0,0.6); 
-    transition: transform 0.2s ease;
+    background: rgba(15, 23, 42, 0.85); 
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 2px solid rgba(255, 255, 255, 0.15); 
+    border-radius: 28px; 
+    padding: 32px; 
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1); 
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.card.testing-active {
+    border-color: #38bdf8;
+    box-shadow: 0 0 40px rgba(56, 189, 248, 0.5), 0 20px 50px rgba(0, 0, 0, 0.8);
+    animation: cardPulse 1.5s infinite ease-in-out;
+}
+
+@keyframes cardPulse {
+    0% { box-shadow: 0 0 25px rgba(56, 189, 248, 0.3), 0 20px 50px rgba(0, 0, 0, 0.8); }
+    50% { box-shadow: 0 0 50px rgba(56, 189, 248, 0.8), 0 20px 50px rgba(0, 0, 0, 0.8); }
+    100% { box-shadow: 0 0 25px rgba(56, 189, 248, 0.3), 0 20px 50px rgba(0, 0, 0, 0.8); }
 }
 
 h1, h2 { color: #facc15; overflow-wrap: anywhere; text-shadow: 2px 2px 0px #b45309; }
@@ -40,9 +69,9 @@ input, select {
     min-width: 0; 
     padding: 14px; 
     color: #fff; 
-    background: #0f172a; 
-    border: 3px solid #334155; 
-    border-radius: 12px; 
+    background: rgba(2, 6, 23, 0.7); 
+    border: 2px solid rgba(255, 255, 255, 0.15); 
+    border-radius: 14px; 
     font-size: 16px;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -52,36 +81,46 @@ input:focus-visible, select:focus-visible {
     box-shadow: 0 0 15px rgba(250, 204, 21, 0.4); 
 }
 
-/* Grille de sécurité Cartoon */
+/* Grille de sécurité */
 .grid-container {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
     width: 320px;
     height: 320px;
-    margin: 30px auto;
+    margin: 10px auto;
 }
 .tile {
     width: 100%;
     height: 100%;
     border-radius: 20px;
     cursor: pointer;
-    border: 3px solid rgba(255,255,255,0.3);
+    border: 2px solid rgba(255,255,255,0.25);
     transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s ease, opacity 0.6s ease;
     box-shadow: 0 8px 0 rgba(0,0,0,0.5);
 }
 .tile:hover {
     transform: scale(1.08) rotate(2deg);
-    filter: brightness(1.15);
+    filter: brightness(1.2);
 }
 .tile:active {
     transform: scale(0.92) translateY(4px);
     box-shadow: 0 2px 0 rgba(0,0,0,0.5);
 }
+
+.tile-connecting {
+    animation: tilePulse 0.4s ease-out;
+}
+@keyframes tilePulse {
+    0% { transform: scale(0.9); box-shadow: 0 0 0 0px rgba(255, 255, 255, 0.9); }
+    50% { transform: scale(1.12); box-shadow: 0 0 0 20px rgba(255, 255, 255, 0); }
+    100% { transform: scale(1); }
+}
+
 .fade-out {
     opacity: 0;
     pointer-events: none;
-    transform: scale(0.8);
+    transform: scale(0.8) rotate(-10deg);
 }
 
 .actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0; }
@@ -89,7 +128,7 @@ button.action {
     flex: 1; 
     min-width: 130px; 
     padding: 14px; 
-    border: 3px solid rgba(0,0,0,0.2); 
+    border: 2px solid rgba(0,0,0,0.2); 
     border-radius: 14px; 
     color: white; 
     font-weight: 700; 
@@ -107,61 +146,57 @@ button.action:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
 .verify, .start { background: #22c55e; border-bottom-color: #15803d; }
 .neutral { background: #64748b; border-bottom-color: #334155; } 
 .download { background: #3b82f6; border-bottom-color: #1d4ed8; }
-button.action:hover:not(:disabled) { filter: brightness(1.1); }
+button.action:hover:not(:disabled) { filter: brightness(1.15); }
 
 .status { min-height: 28px; margin: 14px 0; font-weight: 700; text-align: center; font-size: 16px; }
 .success { color: #4ade80; } .error { color: #f87171; } .info { color: #38bdf8; }
 .config-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-.mode-box { margin: 18px 0; padding: 20px; background: #0f172a; border: 3px dashed #334155; border-radius: 16px; }
+.mode-box { margin: 18px 0; padding: 20px; background: rgba(2, 6, 23, 0.6); border: 2px dashed rgba(255, 255, 255, 0.2); border-radius: 18px; }
 
 .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 24px 0; }
 .stat { 
     padding: 16px 10px; 
     text-align: center; 
-    background: #0f172a; 
-    border: 3px solid #334155; 
-    border-radius: 16px; 
+    background: rgba(2, 6, 23, 0.7); 
+    border: 2px solid rgba(255, 255, 255, 0.15); 
+    border-radius: 18px; 
     box-shadow: inset 0 4px 6px rgba(0,0,0,0.4);
 } 
 .stat strong { display: block; margin-top: 6px; font-size: 28px; color: #facc15; font-family: 'Courier Prime', monospace; }
 
-.progress-section { margin: 20px 0; padding: 18px; background: #0f172a; border: 3px solid #334155; border-radius: 16px; }
+.progress-section { margin: 20px 0; padding: 18px; background: rgba(2, 6, 23, 0.7); border: 2px solid rgba(255, 255, 255, 0.15); border-radius: 18px; }
 .progress-heading { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 10px; font-weight: 600; }
 .progress-heading span:last-child { color: #facc15; }
-progress { display: block; width: 100%; height: 16px; appearance: none; border: none; border-radius: 20px; overflow: hidden; background: #1e293b; border: 2px solid #334155; }
-progress::-webkit-progress-bar { background: #1e293b; }
+progress { display: block; width: 100%; height: 16px; appearance: none; border: none; border-radius: 20px; overflow: hidden; background: #0f172a; border: 1px solid rgba(255, 255, 255, 0.15); }
+progress::-webkit-progress-bar { background: #0f172a; }
 progress::-webkit-progress-value { background: linear-gradient(90deg, #38bdf8, #facc15); border-radius: 20px; transition: width .2s ease; }
 
+/* Journal avec sauts de ligne */
 #log { 
     max-height: 280px; 
-    overflow: auto; 
+    overflow-y: auto; 
     padding: 16px; 
-    background: #050508; 
-    border: 3px solid #1e293b; 
-    border-radius: 12px; 
+    background: rgba(2, 6, 23, 0.9); 
+    border: 2px solid rgba(255, 255, 255, 0.15); 
+    border-radius: 14px; 
     font-family: 'Courier Prime', monospace; 
     font-size: 13px; 
-    line-height: 1.6; 
+    line-height: 1.8; 
     color: #38bdf8; 
+    white-space: pre-wrap; 
+    overflow-wrap: anywhere; 
 }
-
-/* Animation SVG Cartoon Flottante */
-@keyframes float {
-    0% { transform: translateY(0px) rotate(0deg); }
-    50% { transform: translateY(-8px) rotate(2deg); }
-    100% { transform: translateY(0px) rotate(0deg); }
-}
-.cartoon-svg {
-    animation: float 3s ease-in-out infinite;
-    filter: drop-shadow(0 10px 8px rgba(0,0,0,0.4));
-    margin: 0 auto 15px auto;
+.log-line {
     display: block;
+    margin-bottom: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 4px;
 }
 
 @media (max-width: 480px) { 
     body { padding: 10px; } 
     main { margin: 5px auto; } 
-    .card { padding: 18px; } 
+    .card { padding: 20px; } 
     .config-grid { grid-template-columns: 1fr; } 
     .stats { gap: 8px; } 
     .stat strong { font-size: 22px; } 
@@ -169,33 +204,18 @@ progress::-webkit-progress-value { background: linear-gradient(90deg, #38bdf8, #
 </style>
 </head>
 <body>
-<main>
-<!-- SECTION SÉCURITÉ -->
-<section id="login" class="card text-center">
-  <!-- Illustration SVG Cartoon de Cadenas Interactif -->
-  <svg class="cartoon-svg" width="90" height="90" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="20" y="45" width="60" height="45" rx="12" fill="#3b82f6" stroke="#1d4ed8" stroke-width="6"/>
-    <path d="M35 45V32C35 23.7157 41.7157 17 50 17C58.2843 17 65 23.7157 65 32V45" stroke="#facc15" stroke-width="8" stroke-linecap="round"/>
-    <circle cx="50" cy="65" r="8" fill="#facc15" stroke="#b45309" stroke-width="4"/>
-    <path d="M50 73V79" stroke="#b45309" stroke-width="4" stroke-linecap="round"/>
-  </svg>
+<!-- Canvas pour l'animation cartoon et connexion réseau -->
+<canvas id="bgCanvas"></canvas>
 
-  <h1>SÉCURITÉ DU SYSTÈME</h1>
-  <p class="mb-4">Clique sur les couleurs dans l'ordre requis pour déverrouiller le testeur !</p>
+<main>
+<!-- SECTION SÉCURITÉ : Sans aucun texte, uniquement les carrés -->
+<section id="login" class="card text-center" style="background: transparent; border: none; box-shadow: none;">
   <div id="grid" class="grid-container"></div>
   <div id="loginStatus" class="status" role="status" aria-live="polite"></div>
 </section>
 
 <!-- SECTION TESTEUR HTTP -->
 <section id="tester" class="card" hidden>
-  <!-- Illustration SVG Cartoon de Fusée / Serveur -->
-  <svg class="cartoon-svg" width="90" height="90" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M50 10C50 10 30 30 30 60C30 75 40 85 50 90C60 85 70 75 70 60C70 30 50 10 50 10Z" fill="#ef4444" stroke="#991b1b" stroke-width="6"/>
-    <circle cx="50" cy="50" r="12" fill="#38bdf8" stroke="#0369a1" stroke-width="4"/>
-    <path d="M25 70L15 80" stroke="#facc15" stroke-width="6" stroke-linecap="round"/>
-    <path d="M75 70L85 80" stroke="#facc15" stroke-width="6" stroke-linecap="round"/>
-  </svg>
-
   <h1>TESTEUR DE REQUÊTES HTTP</h1>
   <p>Utilise cet outil uniquement sur un serveur que tu possèdes ou que tu es autorisé à tester.</p>
   
@@ -275,6 +295,91 @@ progress::-webkit-progress-value { background: linear-gradient(90deg, #38bdf8, #
 </main>
 
 <script>
+// ANIMATION CANVAS HTML5 & CONNEXION RÉSEAU
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+
+let width, height;
+function resize() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+const particles = [];
+const particleCount = 45;
+for (let i = 0; i < particleCount; i++) {
+    particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        radius: Math.random() * 6 + 3,
+        color: ['#38bdf8', '#facc15', '#a855f7', '#06b6d4', '#6366f1', '#22c55e', '#ef4444', '#ec4899', '#f97316'][Math.floor(Math.random() * 9)],
+        vx: (Math.random() - 0.5) * 1,
+        vy: (Math.random() - 0.5) * 1,
+        angle: Math.random() * Math.PI
+    });
+}
+
+let isTestingActive = false;
+let isConnectingEffect = false;
+
+function animateCanvas() {
+    ctx.clearRect(0, 0, width, height);
+    
+    let grad = ctx.createRadialGradient(width/2, height/2, 50, width/2, height/2, Math.max(width, height));
+    grad.addColorStop(0, '#0f172a');
+    grad.addColorStop(1, '#020617');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, width, height);
+
+    if (isTestingActive || isConnectingEffect) {
+        ctx.strokeStyle = isConnectingEffect ? 'rgba(250, 204, 21, 0.5)' : 'rgba(56, 189, 248, 0.25)';
+        ctx.lineWidth = isConnectingEffect ? 2.5 : 1.2;
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                let dx = particles[i].x - particles[j].x;
+                let dy = particles[i].y - particles[j].y;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < (isConnectingEffect ? 200 : 130)) {
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.stroke();
+                }
+            }
+        }
+    }
+
+    particles.forEach(p => {
+        let speedMultiplier = isTestingActive ? 2.2 : (isConnectingEffect ? 3.5 : 1);
+        p.x += p.vx * speedMultiplier;
+        p.y += p.vy * speedMultiplier;
+        p.angle += 0.03;
+
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.angle);
+        ctx.fillStyle = p.color;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        
+        ctx.beginPath();
+        ctx.roundRect(-p.radius, -p.radius, p.radius * 2, p.radius * 2, 4);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+    });
+
+    requestAnimationFrame(animateCanvas);
+}
+animateCanvas();
+
 // CONFIGURATION DU TESTEUR HTTP
 const CONFIG = {
   MAX_REQUESTS_PER_TEST: 1000,
@@ -292,7 +397,7 @@ const CONFIG = {
   DEFAULT_SCHEDULE_MINUTES: 15
 };
 
-// GESTION ANTI-VEILLE lÉGÈRE (Web Audio API)
+// GESTION ANTI-VEILLE
 let audioCtx = null;
 let oscillator = null;
 
@@ -312,10 +417,7 @@ function enableKeepAwake() {
       gainNode.connect(audioCtx.destination);
       oscillator.start(0);
     }
-    log("Anti-veille activé (Audio discret).");
-  } catch (e) {
-    log("Impossible d'activer l'anti-veille audio : " + e.message);
-  }
+  } catch (e) {}
 }
 
 document.addEventListener('visibilitychange', () => {
@@ -324,7 +426,7 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
-// LOGIQUE DE SÉCURITÉ
+// SÉQUENCE EXACTE : vert, rouge, violet, rose, orange, vert (avec une seule tuile verte physique)
 const targetSequence = ['green', 'red', 'purple', 'pink', 'orange', 'green'];
 let currentIndex = 0;
 
@@ -334,10 +436,10 @@ let tiles = [
     { id: 3, color: 'purple', hex: '#a855f7' },
     { id: 4, color: 'pink', hex: '#ec4899' },
     { id: 5, color: 'orange', hex: '#f97316' },
-    { id: 6, color: 'green', hex: '#22c55e' },
-    { id: 7, color: 'cyan', hex: '#06b6d4' },
-    { id: 8, color: 'yellow', hex: '#eab308' },
-    { id: 9, color: 'blue', hex: '#3b82f6' }
+    { id: 6, color: 'cyan', hex: '#06b6d4' },
+    { id: 7, color: 'yellow', hex: '#eab308' },
+    { id: 8, color: 'blue', hex: '#3b82f6' },
+    { id: 9, color: 'indigo', hex: '#6366f1' }
 ];
 
 function shuffleArray(array) {
@@ -356,26 +458,33 @@ function renderGrid() {
         const btn = document.createElement('div');
         btn.className = 'tile';
         btn.style.backgroundColor = tile.hex;
-        btn.onclick = () => handleTileClick(tile);
+        btn.onclick = (e) => handleTileClick(tile, btn);
         grid.appendChild(btn);
     });
 }
 
-function handleTileClick(tile) {
+function handleTileClick(tile, element) {
     enableKeepAwake();
+    element.classList.add('tile-connecting');
+    setTimeout(() => element.classList.remove('tile-connecting'), 400);
 
     if (tile.color === targetSequence[currentIndex]) {
         currentIndex++;
         
         if (currentIndex === targetSequence.length) {
             document.getElementById('grid').classList.add('fade-out');
+            
+            // Animation de connexion après le succès de la sécurité
+            isConnectingEffect = true;
+
             setTimeout(() => {
+                isConnectingEffect = false;
                 document.getElementById('login').hidden = true;
                 const testerSection = document.getElementById("tester");
                 testerSection.hidden = false;
                 initializeConfig();
                 updateModeVisibility();
-            }, 600);
+            }, 1200);
             return;
         }
     } else {
@@ -383,7 +492,7 @@ function handleTileClick(tile) {
     }
 
     tiles = shuffleArray([...tiles]);
-    renderGrid();
+    setTimeout(renderGrid, 200);
 }
 
 window.onload = function() {
@@ -391,7 +500,7 @@ window.onload = function() {
     renderGrid();
 };
 
-// TESTEUR HTTP & LOGS
+// TESTEUR HTTP & LOGS AVEC SAUTS DE LIGNE
 const urlInput = document.getElementById("url");
 const modeInput = document.getElementById("mode");
 const countInput = document.getElementById("requestCount");
@@ -466,7 +575,7 @@ function updateProgress() {
 function log(message) {
   logEntries.push(`[${new Date().toLocaleTimeString()}] ${message}`);
   if (logEntries.length > 100) logEntries.shift();
-  logEl.textContent = logEntries.join("\n");
+  logEl.innerHTML = logEntries.map(entry => `<span class="log-line">${entry}</span>`).join('');
   logEl.scrollTop = logEl.scrollHeight;
 }
 
@@ -682,6 +791,9 @@ async function runTest() {
   running = true;
   stopRequested = false;
 
+  isTestingActive = true;
+  document.getElementById("tester").classList.add("testing-active");
+
   startButton.disabled = true;
   stopButton.disabled = false;
   [urlInput, modeInput, countInput, requestsPerPassInput, passCountInput,
@@ -732,6 +844,10 @@ async function runTest() {
   } finally {
     running = false;
     activeController = null;
+    
+    isTestingActive = false;
+    document.getElementById("tester").classList.remove("testing-active");
+
     startButton.disabled = false;
     stopButton.disabled = true;
     [urlInput, modeInput, countInput, requestsPerPassInput, passCountInput,
@@ -744,7 +860,7 @@ async function runTest() {
 
 document.getElementById("clear").addEventListener("click", () => {
   logEntries = [];
-  logEl.textContent = "Journal effacé.";
+  logEl.innerHTML = '<span class="log-line">Journal effacé.</span>';
 });
 
 document.getElementById("export").addEventListener("click", () => {
