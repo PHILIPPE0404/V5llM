@@ -87,7 +87,7 @@ progress::-moz-progress-bar { background: #38bdf8; border-radius: 20px; }
   <div id="normalSettings" class="mode-box">
     <h2>Test normal</h2>
     <label for="requestCount">Nombre de requêtes</label>
-    <input id="requestCount" type="number" min="1" max="100" value="10">
+    <input id="requestCount" type="number" min="1" max="1000" value="10">
     <p>Les requêtes sont envoyées une par une.</p>
   </div>
 
@@ -96,7 +96,7 @@ progress::-moz-progress-bar { background: #38bdf8; border-radius: 20px; }
     <div class="config-grid">
       <div>
         <label for="requestsPerPass">Requêtes par passage</label>
-        <input id="requestsPerPass" type="number" min="1" max="10" value="3">
+        <input id="requestsPerPass" type="number" min="1" max="100" value="3">
       </div>
       <div>
         <label for="passCount">Nombre de passages</label>
@@ -116,11 +116,11 @@ progress::-moz-progress-bar { background: #38bdf8; border-radius: 20px; }
         <input id="windowEnd" type="time" value="18:00">
       </div>
     </div>
-    <p>Les tests ne démarrent que pendant cette plage, selon l’heure locale de l’appareil. Une plage comme 22:00–06:00 traverse minuit.</p>
+    <p>Les tests ne démarrent que pendant cette plage, selon l’heure locale de l’appareil.</p>
   </div>
 
-  <label for="interval">Intervalle entre les débuts de requêtes (millisecondes)</label>
-  <input id="interval" type="number" min="500" max="60000" value="2000">
+  <label for="interval">Intervalle entre les débuts de requêtes (ms)</label>
+  <input id="interval" type="number" min="100" max="60000" value="1000">
   <p id="limitsInfo"></p>
 
   <div class="stats">
@@ -149,20 +149,19 @@ progress::-moz-progress-bar { background: #38bdf8; border-radius: 20px; }
 </section>
 </main>
 
-<!-- Élément vidéo silencieux encodé en Base64 pour forcer le maintien en éveil (compatible HTTP/HTTPS) -->
 <video id="noSleepVideo" loop playsinline muted style="display:none; width:1px; height:1px;">
   <source src="data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAAptZGF0AAAAA1YAAAEAAAEAAAE=" type="video/mp4">
 </video>
 
 <script>
-// CONFIGURATION : tests séquentiels et limites modérées.
+// CONFIGURATION : Ajustée pour préserver le processeur de la tablette
 const CONFIG = {
   MAX_REQUESTS_PER_TEST: 100000000,
   MAX_REQUESTS_PER_SCHEDULED_PASS: 100000,
   MAX_SCHEDULED_PASSES: 100,
   MIN_INTERVAL_MS: 1,
   MAX_INTERVAL_MS: 2000,
-  REQUEST_TIMEOUT_MS: 1,
+  REQUEST_TIMEOUT_MS: 0,
   MIN_SCHEDULE_INTERVAL_MINUTES: 1,
   MAX_SCHEDULE_INTERVAL_MINUTES: 1440,
   DEFAULT_REQUESTS: 10,
@@ -172,39 +171,31 @@ const CONFIG = {
   DEFAULT_SCHEDULE_MINUTES: 15
 };
 
-// SYSTEME DE MAINTIEN EN ÉVEIL (Combinaison Wake Lock API + Fallback Vidéo)
+// SYSTEME DE MAINTIEN EN ÉVEIL
 let wakeLock = null;
 const noSleepVideo = document.getElementById("noSleepVideo");
 
 async function enableKeepAwake() {
-  // 1. Essai avec l'API officielle Wake Lock
   if ('wakeLock' in navigator) {
     try {
       wakeLock = await navigator.wakeLock.request('screen');
-      log("Maintien en éveil activé via WakeLock API.");
+      log("Anti-veille activé (WakeLock API).");
       wakeLock.addEventListener('release', () => { wakeLock = null; });
       return;
-    } catch (e) {
-      log("WakeLock API indisponible (" + e.message + "). Bascule sur la méthode vidéo.");
-    }
+    } catch (e) {}
   }
-  // 2. Si l'API échoue ou est bloquée (ex: HTTP non sécurisé), utilisation de la vidéo muette en boucle
   try {
     await noSleepVideo.play();
-    log("Maintien en éveil activé via lecture vidéo.");
-  } catch (err) {
-    log("Échec du maintien en éveil : " + err.message);
-  }
+    log("Anti-veille activé (Lecture vidéo).");
+  } catch (err) {}
 }
 
-// Réactivation automatique si la page repasse au premier plan
 document.addEventListener('visibilitychange', async () => {
   if (document.visibilityState === 'visible') {
     await enableKeepAwake();
   }
 });
 
-// Rouge → Violet → Gris ardoise → Vert → Bleu.
 const SECRET_SEQUENCE = [1, 5, 9, 3, 2];
 const login = document.getElementById("login");
 const tester = document.getElementById("tester");
@@ -245,8 +236,6 @@ document.getElementById("verifyColors").addEventListener("click", async () => {
   tester.hidden = false;
   initializeConfig();
   updateModeVisibility();
-
-  // Activer l'anti-mise en veille suite à l'interaction utilisateur
   await enableKeepAwake();
 });
 
@@ -294,9 +283,7 @@ function initializeConfig() {
   intervalInput.max = String(CONFIG.MAX_INTERVAL_MS);
   intervalInput.value = String(CONFIG.DEFAULT_INTERVAL_MS);
   document.getElementById("limitsInfo").textContent =
-    `Configuration : ${CONFIG.MAX_REQUESTS_PER_TEST} requêtes maximum par test normal ; ` +
-    `${CONFIG.MAX_REQUESTS_PER_SCHEDULED_PASS} par passage programmé ; ` +
-    `intervalle entre débuts de requêtes de ${CONFIG.MIN_INTERVAL_MS} à ${CONFIG.MAX_INTERVAL_MS} ms.`;
+    `Intervalle recommandé : au moins 100 ms pour préserver les performances de la tablette.`;
   updateStats();
   updateProgress();
 }
@@ -319,13 +306,13 @@ function updateProgress() {
   progressBar.value = percent;
   progressPercent.textContent = `${percent} %`;
   progressDetail.textContent = runTarget > 0
-    ? `${runCompleted} / ${runTarget} requêtes terminées pour ce test`
+    ? `${runCompleted} / ${runTarget} requêtes terminées`
     : "Aucun test en cours.";
 }
 
 function log(message) {
-  logEntries.push(`[${new Date().toLocaleString()}] ${message}`);
-  if (logEntries.length > 500) logEntries.shift();
+  logEntries.push(`[${new Date().toLocaleTimeString()}] ${message}`);
+  if (logEntries.length > 100) logEntries.shift();
   logEl.textContent = logEntries.join("\n");
   logEl.scrollTop = logEl.scrollHeight;
 }
@@ -362,8 +349,7 @@ stopButton.addEventListener("click", stopTest);
 
 function parseTime(value) {
   const parts = value.split(":").map(Number);
-  if (parts.length !== 2 || !Number.isInteger(parts[0]) || !Number.isInteger(parts[1]) ||
-      parts[0] < 0 || parts[0] > 23 || parts[1] < 0 || parts[1] > 59) {
+  if (parts.length !== 2 || !Number.isInteger(parts[0]) || !Number.isInteger(parts[1])) {
     throw new Error("Saisis une plage horaire valide.");
   }
   return parts[0] * 60 + parts[1];
@@ -390,10 +376,9 @@ async function waitForWindow(start, end) {
   while (!stopRequested && !isWithinWindow(start, end)) {
     const delay = millisecondsUntilNextWindow(start, end);
     const nextOpen = new Date(Date.now() + delay);
-    testStatus.textContent = `Hors plage horaire. Reprise prévue vers ${nextOpen.toLocaleString()}.`;
+    testStatus.textContent = `Hors plage horaire. Attente jusqu'à ${nextOpen.toLocaleTimeString()}.`;
     testStatus.className = "status info";
-    log(`Hors plage horaire. Attente jusqu'à environ ${nextOpen.toLocaleString()}.`);
-    await waitFor(delay + 100);
+    await waitFor(Math.min(delay, 10000));
   }
   return !stopRequested;
 }
@@ -424,21 +409,20 @@ async function performRequest(target, label) {
 
     if (response.ok) {
       accepted++;
-      log(`${label} : HTTP ${response.status} — acceptée — ${elapsed} ms`);
+      log(`${label} : HTTP ${response.status} — ${elapsed} ms`);
     } else {
       refused++;
-      log(`${label} : HTTP ${response.status} — refusée — ${elapsed} ms`);
+      log(`${label} : HTTP ${response.status} — ${elapsed} ms`);
     }
   } catch (error) {
     if (stopRequested) {
       total--;
-      log(`${label} : requête interrompue par l'utilisateur.`);
       return false;
     }
     refused++;
     log(timedOut
-      ? `${label} : délai dépassé (${CONFIG.REQUEST_TIMEOUT_MS} ms).`
-      : `${label} : erreur réseau ou blocage CORS.`);
+      ? `${label} : Délai dépassé (${CONFIG.REQUEST_TIMEOUT_MS} ms)`
+      : `${label} : Erreur réseau / CORS`);
   } finally {
     if (timeoutId !== null) clearTimeout(timeoutId);
     if (activeController === controller) activeController = null;
@@ -460,182 +444,8 @@ async function runBatch(target, count, interval, label, scheduleWindow) {
     if (stopRequested) return false;
 
     const requestStartedAt = performance.now();
-    const ok = await performRequest(target, `${label}, requête ${index + 1}/${count}`);
+    const ok = await performRequest(target, `${label} (${index + 1}/${count})`);
     if (!ok || stopRequested) return false;
 
     if (index < count - 1) {
       const elapsed = performance.now() - requestStartedAt;
-      const remaining = interval - elapsed;
-      if (remaining > 0) await waitFor(remaining);
-    }
-  }
-  return !stopRequested;
-}
-
-async function runTest() {
-  if (running) return;
-
-  await enableKeepAwake();
-
-  let target;
-  try {
-    target = new URL(urlInput.value.trim());
-    if (!["http:", "https:"].includes(target.protocol) || !target.hostname) {
-      throw new Error("Saisis une URL HTTP ou HTTPS valide.");
-    }
-  } catch (error) {
-    testStatus.textContent = "URL invalide : " + error.message;
-    testStatus.className = "status error";
-    return;
-  }
-
-  const rawInterval = Number(intervalInput.value);
-  if (!Number.isFinite(rawInterval) || rawInterval < 0) {
-    testStatus.textContent = "Intervalle invalide.";
-    testStatus.className = "status error";
-    return;
-  }
-  const interval = Math.max(CONFIG.MIN_INTERVAL_MS, Math.min(rawInterval, CONFIG.MAX_INTERVAL_MS));
-  intervalInput.value = String(interval);
-
-  const scheduled = modeInput.value === "scheduled";
-  let requestCount, passCount = 1, scheduleMinutes = 0, scheduleWindow = null;
-
-  if (!scheduled) {
-    const requested = Number(countInput.value);
-    if (!Number.isInteger(requested) || requested < 1) {
-      testStatus.textContent = "Le nombre de requêtes doit être un entier positif.";
-      testStatus.className = "status error";
-      return;
-    }
-    requestCount = Math.min(requested, CONFIG.MAX_REQUESTS_PER_TEST);
-    countInput.value = String(requestCount);
-  } else {
-    const requestedPerPass = Number(requestsPerPassInput.value);
-    const requestedPasses = Number(passCountInput.value);
-    const requestedMinutes = Number(scheduleMinutesInput.value);
-    if (!Number.isInteger(requestedPerPass) || requestedPerPass < 1 ||
-        !Number.isInteger(requestedPasses) || requestedPasses < 1 ||
-        !Number.isFinite(requestedMinutes) || requestedMinutes < 0) {
-      testStatus.textContent = "Vérifie les paramètres du test programmé.";
-      testStatus.className = "status error";
-      return;
-    }
-    try {
-      const start = parseTime(windowStartInput.value);
-      const end = parseTime(windowEndInput.value);
-      if (start === end) throw new Error("L'heure de début et l'heure de fin doivent être différentes.");
-      scheduleWindow = { start, end };
-    } catch (error) {
-      testStatus.textContent = error.message;
-      testStatus.className = "status error";
-      return;
-    }
-    requestCount = Math.min(requestedPerPass, CONFIG.MAX_REQUESTS_PER_SCHEDULED_PASS);
-    passCount = Math.min(requestedPasses, CONFIG.MAX_SCHEDULED_PASSES);
-    scheduleMinutes = Math.max(CONFIG.MIN_SCHEDULE_INTERVAL_MINUTES,
-      Math.min(requestedMinutes, CONFIG.MAX_SCHEDULE_INTERVAL_MINUTES));
-    requestsPerPassInput.value = String(requestCount);
-    passCountInput.value = String(passCount);
-    scheduleMinutesInput.value = String(scheduleMinutes);
-  }
-
-  runCompleted = 0;
-  runTarget = requestCount * passCount;
-  updateProgress();
-  running = true;
-  stopRequested = false;
-
-  startButton.disabled = true;
-  stopButton.disabled = false;
-  [urlInput, modeInput, countInput, requestsPerPassInput, passCountInput,
-   scheduleMinutesInput, windowStartInput, windowEndInput, intervalInput]
-    .forEach(input => input.disabled = true);
-
-  log(`Démarrage du test vers ${target.href}.`);
-  log(`Mode : ${scheduled ? "programmé" : "normal"}. Intervalle demandé : ${interval} ms entre les débuts de requêtes.`);
-  if (scheduled) log(`Plage horaire locale : ${windowStartInput.value}–${windowEndInput.value}.`);
-
-  try {
-    if (!scheduled) {
-      testStatus.textContent = "Test normal en cours…";
-      testStatus.className = "status info";
-      await runBatch(target, requestCount, interval, "Test normal", null);
-    } else {
-      for (let pass = 1; pass <= passCount; pass++) {
-        if (stopRequested) break;
-        const allowed = await waitForWindow(scheduleWindow.start, scheduleWindow.end);
-        if (!allowed) break;
-        testStatus.textContent = `Passage ${pass}/${passCount} en cours…`;
-        testStatus.className = "status info";
-        log(`Début du passage ${pass}/${passCount}.`);
-        const completed = await runBatch(target, requestCount, interval,
-          `Passage ${pass}/${passCount}`, scheduleWindow);
-        if (!completed || stopRequested) break;
-        log(`Passage ${pass}/${passCount} terminé.`);
-        if (pass < passCount) {
-          testStatus.textContent = `Passage terminé. Attente de ${scheduleMinutes} minute(s) avant le suivant.`;
-          log(`Attente de ${scheduleMinutes} minute(s) avant le passage suivant.`);
-          await waitFor(scheduleMinutes * 60 * 1000);
-        }
-      }
-    }
-
-    if (stopRequested) {
-      testStatus.textContent = "Test arrêté.";
-      testStatus.className = "status info";
-      log("Test arrêté par l'utilisateur.");
-    } else {
-      testStatus.textContent = scheduled ? "Tous les passages programmés sont terminés." : "Test terminé.";
-      testStatus.className = "status success";
-      log("Fin du test.");
-    }
-  } catch (error) {
-    testStatus.textContent = "Erreur : " + (error.message || "erreur inconnue");
-    testStatus.className = "status error";
-    log("Erreur : " + (error.message || "erreur inconnue"));
-  } finally {
-    running = false;
-    activeController = null;
-    startButton.disabled = false;
-    stopButton.disabled = true;
-    [urlInput, modeInput, countInput, requestsPerPassInput, passCountInput,
-     scheduleMinutesInput, windowStartInput, windowEndInput, intervalInput]
-      .forEach(input => input.disabled = false);
-    updateStats();
-    updateProgress();
-  }
-}
-
-document.getElementById("clear").addEventListener("click", () => {
-  logEntries = [];
-  logEl.textContent = "Journal effacé.";
-});
-
-document.getElementById("export").addEventListener("click", () => {
-  const report = [
-    "RAPPORT DU TESTEUR HTTP",
-    `Date : ${new Date().toLocaleString()}`,
-    `URL : ${urlInput.value}`,
-    `Mode : ${modeInput.value}`,
-    `Total : ${total}`,
-    `Acceptées : ${accepted}`,
-    `Refusées : ${refused}`,
-    `Progression : ${progressPercent.textContent}`,
-    "",
-    ...logEntries
-  ].join("\n");
-  const blob = new Blob([report], { type: "text/plain;charset=utf-8" });
-  const downloadUrl = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = downloadUrl;
-  link.download = "rapport-test-http.txt";
-  link.click();
-  setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
-});
-
-initializeConfig();
-updateModeVisibility();
-</script>
-</body>
-</html>
