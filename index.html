@@ -4,9 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Accès sécurisé — Testeur HTTP</title>
+<!-- Tailwind CSS CDN pour la grille de sécurité -->
+<script src="https://cdn.tailwindcss.com"></script>
 <style>
 * { box-sizing: border-box; font-family: "Courier New", monospace; }
-body { margin: 0; padding: 20px; min-height: 100vh; background: #0b0f19; color: #f8fafc; }
+body { margin: 0; padding: 20px; min-height: 100vh; background: #030305; color: #f8fafc; }
 main { max-width: 800px; margin: 20px auto; }
 .card { background: #151d2a; border: 1px solid #2d3748; border-radius: 16px; padding: 24px; box-shadow: 0 12px 30px #0005; }
 h1, h2 { color: #38bdf8; overflow-wrap: anywhere; }
@@ -17,13 +19,32 @@ p, small { color: #94a3b8; line-height: 1.6; }
 label { display: block; margin: 16px 0 7px; font-weight: bold; }
 input, select { width: 100%; min-width: 0; padding: 11px; color: #f8fafc; background: #0b0f19; border: 1px solid #475569; border-radius: 8px; }
 input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid #38bdf8; outline-offset: 2px; }
-.color-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 24px 0; }
-.color-square { width: 100%; aspect-ratio: 1; padding: 0; border: 1px solid #ffffff24; border-radius: 10px; cursor: pointer; transition: transform .12s, border-color .12s; }
-.color-square:hover { transform: scale(1.025); }
-.color-square.selected { border: 2px solid #fff; box-shadow: 0 0 0 1px #38bdf8; }
-.c1 { background: #ef4444; } .c2 { background: #3b82f6; } .c3 { background: #22c55e; }
-.c4 { background: #eab308; } .c5 { background: #a855f7; } .c6 { background: #ec4899; }
-.c7 { background: #f97316; } .c8 { background: #06b6d4; } .c9 { background: #64748b; }
+
+/* Grille de sécurité */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    width: 300px;
+    height: 300px;
+    margin: 40px auto;
+}
+.tile {
+    width: 100%;
+    height: 100%;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.6s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+.tile:active {
+    transform: scale(0.9);
+}
+.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
 .actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0; }
 button.action { flex: 1; min-width: 120px; padding: 12px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; }
 button.action:disabled { opacity: .45; cursor: not-allowed; }
@@ -51,27 +72,15 @@ progress::-moz-progress-bar { background: #38bdf8; border-radius: 20px; }
 </head>
 <body>
 <main>
-<section id="login" class="card">
-  <h1>SÉCURITÉ COULEURS</h1>
-  <p>Clique sur les cinq couleurs dans le bon ordre.</p>
-  <div class="color-grid" aria-label="Séquence de couleurs">
-    <button type="button" class="color-square c1" data-color="1" aria-label="Rouge"></button>
-    <button type="button" class="color-square c2" data-color="2" aria-label="Bleu"></button>
-    <button type="button" class="color-square c3" data-color="3" aria-label="Vert"></button>
-    <button type="button" class="color-square c4" data-color="4" aria-label="Jaune"></button>
-    <button type="button" class="color-square c5" data-color="5" aria-label="Violet"></button>
-    <button type="button" class="color-square c6" data-color="6" aria-label="Rose"></button>
-    <button type="button" class="color-square c7" data-color="7" aria-label="Orange"></button>
-    <button type="button" class="color-square c8" data-color="8" aria-label="Cyan"></button>
-    <button type="button" class="color-square c9" data-color="9" aria-label="Gris ardoise"></button>
-  </div>
-  <div class="actions">
-    <button type="button" class="action reset" id="resetColors">Réinitialiser</button>
-    <button type="button" class="action verify" id="verifyColors">Vérifier</button>
-  </div>
+<!-- SECTION SÉCURITÉ -->
+<section id="login" class="card text-center">
+  <h1 class="text-xl font-bold mb-2">SÉCURITÉ MINIMALE</h1>
+  <p class="mb-4">Clique sur les couleurs dans l'ordre requis.</p>
+  <div id="grid" class="grid-container"></div>
   <div id="loginStatus" class="status" role="status" aria-live="polite"></div>
 </section>
 
+<!-- SECTION TESTEUR HTTP -->
 <section id="tester" class="card" hidden>
   <h1>TESTEUR DE REQUÊTES HTTP</h1>
   <p>Utilise cet outil uniquement sur un serveur que tu possèdes ou que tu es autorisé à tester.</p>
@@ -149,19 +158,15 @@ progress::-moz-progress-bar { background: #38bdf8; border-radius: 20px; }
 </section>
 </main>
 
-<video id="noSleepVideo" loop playsinline muted style="display:none; width:1px; height:1px;">
-  <source src="data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAAptZGF0AAAAA1YAAAEAAAEAAAE=" type="video/mp4">
-</video>
-
 <script>
-// CONFIGURATION : Ajustée pour préserver le processeur de la tablette
+// CONFIGURATION DU TESTEUR HTTP (Sécurisée pour ne pas surcharger la tablette/serveur)
 const CONFIG = {
   MAX_REQUESTS_PER_TEST: 100000000,
   MAX_REQUESTS_PER_SCHEDULED_PASS: 100000,
   MAX_SCHEDULED_PASSES: 100,
   MIN_INTERVAL_MS: 1,
   MAX_INTERVAL_MS: 2000,
-  REQUEST_TIMEOUT_MS: 0,
+  REQUEST_TIMEOUT_MS: 1,
   MIN_SCHEDULE_INTERVAL_MINUTES: 1,
   MAX_SCHEDULE_INTERVAL_MINUTES: 1440,
   DEFAULT_REQUESTS: 10,
@@ -171,74 +176,106 @@ const CONFIG = {
   DEFAULT_SCHEDULE_MINUTES: 15
 };
 
-// SYSTEME DE MAINTIEN EN ÉVEIL
-let wakeLock = null;
-const noSleepVideo = document.getElementById("noSleepVideo");
+// GESTION ANTI-VEILLE lÉGÈRE (Web Audio API - Pas de lag, pas de vidéo)
+let audioCtx = null;
+let oscillator = null;
 
-async function enableKeepAwake() {
-  if ('wakeLock' in navigator) {
-    try {
-      wakeLock = await navigator.wakeLock.request('screen');
-      log("Anti-veille activé (WakeLock API).");
-      wakeLock.addEventListener('release', () => { wakeLock = null; });
-      return;
-    } catch (e) {}
-  }
+function enableKeepAwake() {
   try {
-    await noSleepVideo.play();
-    log("Anti-veille activé (Lecture vidéo).");
-  } catch (err) {}
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    if (!oscillator) {
+      oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      gainNode.gain.value = 0.00001; // Volume quasi nul (totalement inaudible)
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      oscillator.start(0);
+    }
+    log("Anti-veille activé (Audio discret).");
+  } catch (e) {
+    log("Impossible d'activer l'anti-veille audio : " + e.message);
+  }
 }
 
-document.addEventListener('visibilitychange', async () => {
+document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') {
-    await enableKeepAwake();
+    enableKeepAwake();
   }
 });
 
-const SECRET_SEQUENCE = [1, 5, 9, 3, 2];
-const login = document.getElementById("login");
-const tester = document.getElementById("tester");
-const loginStatus = document.getElementById("loginStatus");
-const colorButtons = [...document.querySelectorAll(".color-square")];
-let selectedColors = [];
+// LOGIQUE DE SÉCURITÉ (Grille de couleurs cliquable)
+const targetSequence = ['green', 'red', 'purple', 'pink', 'orange', 'green'];
+let currentIndex = 0;
 
-function resetColors() {
-  selectedColors = [];
-  colorButtons.forEach(button => button.classList.remove("selected"));
-  loginStatus.textContent = "";
-  loginStatus.className = "status";
+let tiles = [
+    { id: 1, color: 'green', hex: '#00ff66' },
+    { id: 2, color: 'red', hex: '#ff0055' },
+    { id: 3, color: 'purple', hex: '#9333ea' },
+    { id: 4, color: 'pink', hex: '#ec4899' },
+    { id: 5, color: 'orange', hex: '#f97316' },
+    { id: 6, color: 'green', hex: '#00ff66' },
+    { id: 7, color: 'cyan', hex: '#00ffff' },
+    { id: 8, color: 'yellow', hex: '#eab308' },
+    { id: 9, color: 'blue', hex: '#3b82f6' }
+];
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
 }
 
-colorButtons.forEach(button => {
-  button.addEventListener("click", () => {
-    if (selectedColors.length >= SECRET_SEQUENCE.length) return;
-    selectedColors.push(Number(button.dataset.color));
-    button.classList.add("selected");
-    loginStatus.textContent = "";
-    loginStatus.className = "status";
-  });
-});
+function renderGrid() {
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+    
+    tiles.forEach(tile => {
+        const btn = document.createElement('div');
+        btn.className = 'tile';
+        btn.style.backgroundColor = tile.hex;
+        btn.onclick = () => handleTileClick(tile);
+        grid.appendChild(btn);
+    });
+}
 
-document.getElementById("resetColors").addEventListener("click", resetColors);
-document.getElementById("verifyColors").addEventListener("click", async () => {
-  const correct = selectedColors.length === SECRET_SEQUENCE.length &&
-    selectedColors.every((value, index) => value === SECRET_SEQUENCE[index]);
-  if (!correct) {
-    resetColors();
-    loginStatus.textContent = "ACCÈS REFUSÉ ✖";
-    loginStatus.className = "status error";
-    return;
-  }
-  loginStatus.textContent = "ACCÈS AUTORISÉ ✔";
-  loginStatus.className = "status success";
-  login.hidden = true;
-  tester.hidden = false;
-  initializeConfig();
-  updateModeVisibility();
-  await enableKeepAwake();
-});
+function handleTileClick(tile) {
+    enableKeepAwake(); // Active l'anti-veille dès la première interaction
 
+    if (tile.color === targetSequence[currentIndex]) {
+        currentIndex++;
+        
+        if (currentIndex === targetSequence.length) {
+            document.getElementById('grid').classList.add('fade-out');
+            setTimeout(() => {
+                document.getElementById('login').hidden = true;
+                const testerSection = document.getElementById("tester");
+                testerSection.hidden = false;
+                initializeConfig();
+                updateModeVisibility();
+            }, 600);
+            return;
+        }
+    } else {
+        currentIndex = 0;
+    }
+
+    tiles = shuffleArray([...tiles]);
+    renderGrid();
+}
+
+window.onload = function() {
+    tiles = shuffleArray([...tiles]);
+    renderGrid();
+};
+
+// TESTEUR HTTP & LOGS
 const urlInput = document.getElementById("url");
 const modeInput = document.getElementById("mode");
 const countInput = document.getElementById("requestCount");
@@ -283,7 +320,7 @@ function initializeConfig() {
   intervalInput.max = String(CONFIG.MAX_INTERVAL_MS);
   intervalInput.value = String(CONFIG.DEFAULT_INTERVAL_MS);
   document.getElementById("limitsInfo").textContent =
-    `Intervalle recommandé : au moins 100 ms pour préserver les performances de la tablette.`;
+    `Intervalle recommandé : au moins 100 ms pour préserver les performances.`;
   updateStats();
   updateProgress();
 }
@@ -449,3 +486,172 @@ async function runBatch(target, count, interval, label, scheduleWindow) {
 
     if (index < count - 1) {
       const elapsed = performance.now() - requestStartedAt;
+      const remaining = interval - elapsed;
+      if (remaining > 0) await waitFor(remaining);
+    }
+  }
+  return !stopRequested;
+}
+
+async function runTest() {
+  if (running) return;
+  enableKeepAwake();
+
+  let target;
+  try {
+    target = new URL(urlInput.value.trim());
+    if (!["http:", "https:"].includes(target.protocol) || !target.hostname) {
+      throw new Error("Saisis une URL HTTP ou HTTPS valide.");
+    }
+  } catch (error) {
+    testStatus.textContent = "URL invalide : " + error.message;
+    testStatus.className = "status error";
+    return;
+  }
+
+  const rawInterval = Number(intervalInput.value);
+  if (!Number.isFinite(rawInterval) || rawInterval < 0) {
+    testStatus.textContent = "Intervalle invalide.";
+    testStatus.className = "status error";
+    return;
+  }
+  const interval = Math.max(CONFIG.MIN_INTERVAL_MS, Math.min(rawInterval, CONFIG.MAX_INTERVAL_MS));
+  intervalInput.value = String(interval);
+
+  const scheduled = modeInput.value === "scheduled";
+  let requestCount, passCount = 1, scheduleMinutes = 0, scheduleWindow = null;
+
+  if (!scheduled) {
+    const requested = Number(countInput.value);
+    if (!Number.isInteger(requested) || requested < 1) {
+      testStatus.textContent = "Le nombre de requêtes doit être un entier positif.";
+      testStatus.className = "status error";
+      return;
+    }
+    requestCount = Math.min(requested, CONFIG.MAX_REQUESTS_PER_TEST);
+    countInput.value = String(requestCount);
+  } else {
+    const requestedPerPass = Number(requestsPerPassInput.value);
+    const requestedPasses = Number(passCountInput.value);
+    const requestedMinutes = Number(scheduleMinutesInput.value);
+    if (!Number.isInteger(requestedPerPass) || requestedPerPass < 1 ||
+        !Number.isInteger(requestedPasses) || requestedPasses < 1 ||
+        !Number.isFinite(requestedMinutes) || requestedMinutes < 0) {
+      testStatus.textContent = "Vérifie les paramètres du test programmé.";
+      testStatus.className = "status error";
+      return;
+    }
+    try {
+      const start = parseTime(windowStartInput.value);
+      const end = parseTime(windowEndInput.value);
+      if (start === end) throw new Error("L'heure de début et l'heure de fin doivent être différentes.");
+      scheduleWindow = { start, end };
+    } catch (error) {
+      testStatus.textContent = error.message;
+      testStatus.className = "status error";
+      return;
+    }
+    requestCount = Math.min(requestedPerPass, CONFIG.MAX_REQUESTS_PER_SCHEDULED_PASS);
+    passCount = Math.min(requestedPasses, CONFIG.MAX_SCHEDULED_PASSES);
+    scheduleMinutes = Math.max(CONFIG.MIN_SCHEDULE_INTERVAL_MINUTES,
+      Math.min(requestedMinutes, CONFIG.MAX_SCHEDULE_INTERVAL_MINUTES));
+    requestsPerPassInput.value = String(requestCount);
+    passCountInput.value = String(passCount);
+    scheduleMinutesInput.value = String(scheduleMinutes);
+  }
+
+  runCompleted = 0;
+  runTarget = requestCount * passCount;
+  updateProgress();
+  running = true;
+  stopRequested = false;
+
+  startButton.disabled = true;
+  stopButton.disabled = false;
+  [urlInput, modeInput, countInput, requestsPerPassInput, passCountInput,
+   scheduleMinutesInput, windowStartInput, windowEndInput, intervalInput]
+    .forEach(input => input.disabled = true);
+
+  log(`Démarrage du test vers ${target.href}.`);
+  log(`Mode : ${scheduled ? "programmé" : "normal"}. Intervalle : ${interval} ms.`);
+
+  try {
+    if (!scheduled) {
+      testStatus.textContent = "Test normal en cours…";
+      testStatus.className = "status info";
+      await runBatch(target, requestCount, interval, "Test normal", null);
+    } else {
+      for (let pass = 1; pass <= passCount; pass++) {
+        if (stopRequested) break;
+        const allowed = await waitForWindow(scheduleWindow.start, scheduleWindow.end);
+        if (!allowed) break;
+        testStatus.textContent = `Passage ${pass}/${passCount} en cours…`;
+        testStatus.className = "status info";
+        log(`Début du passage ${pass}/${passCount}.`);
+        const completed = await runBatch(target, requestCount, interval,
+          `Passage ${pass}/${passCount}`, scheduleWindow);
+        if (!completed || stopRequested) break;
+        log(`Passage ${pass}/${passCount} terminé.`);
+        if (pass < passCount) {
+          testStatus.textContent = `Attente de ${scheduleMinutes} minute(s) avant le suivant.`;
+          log(`Attente de ${scheduleMinutes} minute(s).`);
+          await waitFor(scheduleMinutes * 60 * 1000);
+        }
+      }
+    }
+
+    if (stopRequested) {
+      testStatus.textContent = "Test arrêté.";
+      testStatus.className = "status info";
+      log("Test arrêté par l'utilisateur.");
+    } else {
+      testStatus.textContent = scheduled ? "Passages programmés terminés." : "Test terminé.";
+      testStatus.className = "status success";
+      log("Fin du test.");
+    }
+  } catch (error) {
+    testStatus.textContent = "Erreur : " + (error.message || "inconnue");
+    testStatus.className = "status error";
+    log("Erreur : " + error.message);
+  } finally {
+    running = false;
+    activeController = null;
+    startButton.disabled = false;
+    stopButton.disabled = true;
+    [urlInput, modeInput, countInput, requestsPerPassInput, passCountInput,
+     scheduleMinutesInput, windowStartInput, windowEndInput, intervalInput]
+      .forEach(input => input.disabled = false);
+    updateStats();
+    updateProgress();
+  }
+}
+
+document.getElementById("clear").addEventListener("click", () => {
+  logEntries = [];
+  logEl.textContent = "Journal effacé.";
+});
+
+document.getElementById("export").addEventListener("click", () => {
+  const report = [
+    "RAPPORT DU TESTEUR HTTP",
+    `Date : ${new Date().toLocaleString()}`,
+    `URL : ${urlInput.value}`,
+    `Mode : ${modeInput.value}`,
+    `Total : ${total}`,
+    `Acceptées : ${accepted}`,
+    `Refusées : ${refused}`,
+    `Progression : ${progressPercent.textContent}`,
+    "",
+    ...logEntries
+  ].join("\n");
+  const blob = new Blob([report], { type: "text/plain;charset=utf-8" });
+  const downloadUrl = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = downloadUrl;
+  link.download = "rapport-test-http.txt";
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+});
+</script>
+</body>
+</html>
