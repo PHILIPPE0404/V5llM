@@ -3,87 +3,202 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Accès sécurisé — Testeur HTTP</title>
-<!-- Tailwind CSS CDN pour la grille de sécurité -->
+<title>Accès sécurisé — Testeur HTTP AAA</title>
+<!-- Tailwind CSS CDN -->
 <script src="https://cdn.tailwindcss.com"></script>
+<!-- Google Font pour un style Cartoon / AAA moderne -->
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Courier+Prime:wght@700&display=swap" rel="stylesheet">
 <style>
-* { box-sizing: border-box; font-family: "Courier New", monospace; }
-body { margin: 0; padding: 20px; min-height: 100vh; background: #030305; color: #f8fafc; }
-main { max-width: 800px; margin: 20px auto; }
-.card { background: #151d2a; border: 1px solid #2d3748; border-radius: 16px; padding: 24px; box-shadow: 0 12px 30px #0005; }
-h1, h2 { color: #38bdf8; overflow-wrap: anywhere; }
-h1 { font-size: 23px; }
-h2 { font-size: 17px; margin-top: 24px; }
-p, small { color: #94a3b8; line-height: 1.6; }
-[hidden] { display: none !important; }
-label { display: block; margin: 16px 0 7px; font-weight: bold; }
-input, select { width: 100%; min-width: 0; padding: 11px; color: #f8fafc; background: #0b0f19; border: 1px solid #475569; border-radius: 8px; }
-input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid #38bdf8; outline-offset: 2px; }
+* { box-sizing: border-box; font-family: 'Fredoka', cursive, sans-serif; }
+body { 
+    margin: 0; 
+    padding: 20px; 
+    min-height: 100vh; 
+    background: radial-gradient(circle at center, #1e1b4b 0%, #09090b 100%); 
+    color: #f8fafc; 
+}
+main { max-width: 840px; margin: 20px auto; }
 
-/* Grille de sécurité */
+.card { 
+    background: #181824; 
+    border: 3px solid #3b82f6; 
+    border-radius: 24px; 
+    padding: 30px; 
+    box-shadow: 0 16px 0 #1e3a8a, 0 20px 40px rgba(0,0,0,0.6); 
+    transition: transform 0.2s ease;
+}
+
+h1, h2 { color: #facc15; overflow-wrap: anywhere; text-shadow: 2px 2px 0px #b45309; }
+h1 { font-size: 28px; text-align: center; margin-bottom: 10px; }
+h2 { font-size: 20px; margin-top: 24px; }
+p, small { color: #cbd5e1; line-height: 1.6; font-size: 15px; }
+[hidden] { display: none !important; }
+
+label { display: block; margin: 18px 0 8px; font-weight: 600; color: #38bdf8; }
+input, select { 
+    width: 100%; 
+    min-width: 0; 
+    padding: 14px; 
+    color: #fff; 
+    background: #0f172a; 
+    border: 3px solid #334155; 
+    border-radius: 12px; 
+    font-size: 16px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+input:focus-visible, select:focus-visible { 
+    outline: none; 
+    border-color: #facc15; 
+    box-shadow: 0 0 15px rgba(250, 204, 21, 0.4); 
+}
+
+/* Grille de sécurité Cartoon */
 .grid-container {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
-    width: 300px;
-    height: 300px;
-    margin: 40px auto;
+    width: 320px;
+    height: 320px;
+    margin: 30px auto;
 }
 .tile {
     width: 100%;
     height: 100%;
-    border-radius: 16px;
+    border-radius: 20px;
     cursor: pointer;
-    transition: transform 0.15s ease, opacity 0.6s ease;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    border: 3px solid rgba(255,255,255,0.3);
+    transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s ease, opacity 0.6s ease;
+    box-shadow: 0 8px 0 rgba(0,0,0,0.5);
+}
+.tile:hover {
+    transform: scale(1.08) rotate(2deg);
+    filter: brightness(1.15);
 }
 .tile:active {
-    transform: scale(0.9);
+    transform: scale(0.92) translateY(4px);
+    box-shadow: 0 2px 0 rgba(0,0,0,0.5);
 }
 .fade-out {
     opacity: 0;
     pointer-events: none;
+    transform: scale(0.8);
 }
 
-.actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0; }
-button.action { flex: 1; min-width: 120px; padding: 12px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; }
-button.action:disabled { opacity: .45; cursor: not-allowed; }
-.reset, .stop { background: #dc2626; } .verify, .start { background: #16a34a; }
-.neutral { background: #475569; } .download { background: #2563eb; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0; }
+button.action { 
+    flex: 1; 
+    min-width: 130px; 
+    padding: 14px; 
+    border: 3px solid rgba(0,0,0,0.2); 
+    border-radius: 14px; 
+    color: white; 
+    font-weight: 700; 
+    font-size: 16px;
+    cursor: pointer; 
+    box-shadow: 0 6px 0 rgba(0,0,0,0.4);
+    transition: transform 0.1s, filter 0.2s;
+}
+button.action:active:not(:disabled) {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 rgba(0,0,0,0.4);
+}
+button.action:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+.reset, .stop { background: #ef4444; border-bottom-color: #991b1b; } 
+.verify, .start { background: #22c55e; border-bottom-color: #15803d; }
+.neutral { background: #64748b; border-bottom-color: #334155; } 
+.download { background: #3b82f6; border-bottom-color: #1d4ed8; }
 button.action:hover:not(:disabled) { filter: brightness(1.1); }
-.status { min-height: 24px; margin: 14px 0; font-weight: bold; line-height: 1.5; overflow-wrap: anywhere; }
+
+.status { min-height: 28px; margin: 14px 0; font-weight: 700; text-align: center; font-size: 16px; }
 .success { color: #4ade80; } .error { color: #f87171; } .info { color: #38bdf8; }
 .config-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-.mode-box { margin: 18px 0; padding: 16px; background: #0b0f19; border: 1px solid #334155; border-radius: 10px; }
-.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 22px 0; }
-.stat { padding: 14px 6px; text-align: center; background: #0b0f19; border: 1px solid #263448; border-radius: 10px; overflow-wrap: anywhere; }
-.stat strong { display: block; margin-top: 8px; font-size: 25px; }
-.progress-section { margin: 20px 0; padding: 15px; background: #0b0f19; border: 1px solid #263448; border-radius: 10px; }
-.progress-heading { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 10px; font-size: 13px; }
-.progress-heading span:last-child { color: #38bdf8; white-space: nowrap; }
-progress { display: block; width: 100%; height: 12px; appearance: none; -webkit-appearance: none; border: none; border-radius: 20px; overflow: hidden; background: #263448; }
-progress::-webkit-progress-bar { background: #263448; border-radius: 20px; }
-progress::-webkit-progress-value { background: #38bdf8; border-radius: 20px; transition: width .2s ease; }
-progress::-moz-progress-bar { background: #38bdf8; border-radius: 20px; }
-#progressDetail { display: block; margin-top: 8px; font-size: 12px; color: #94a3b8; }
-#log { max-height: 320px; overflow: auto; padding: 14px; background: #080c14; border-radius: 8px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; line-height: 1.7; }
-@media (max-width: 480px) { body { padding: 10px; } main { margin: 5px auto; } .card { padding: 16px; } .config-grid { grid-template-columns: 1fr; } .stats { gap: 6px; } .stat strong { font-size: 20px; } }
+.mode-box { margin: 18px 0; padding: 20px; background: #0f172a; border: 3px dashed #334155; border-radius: 16px; }
+
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 24px 0; }
+.stat { 
+    padding: 16px 10px; 
+    text-align: center; 
+    background: #0f172a; 
+    border: 3px solid #334155; 
+    border-radius: 16px; 
+    box-shadow: inset 0 4px 6px rgba(0,0,0,0.4);
+} 
+.stat strong { display: block; margin-top: 6px; font-size: 28px; color: #facc15; font-family: 'Courier Prime', monospace; }
+
+.progress-section { margin: 20px 0; padding: 18px; background: #0f172a; border: 3px solid #334155; border-radius: 16px; }
+.progress-heading { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 10px; font-weight: 600; }
+.progress-heading span:last-child { color: #facc15; }
+progress { display: block; width: 100%; height: 16px; appearance: none; border: none; border-radius: 20px; overflow: hidden; background: #1e293b; border: 2px solid #334155; }
+progress::-webkit-progress-bar { background: #1e293b; }
+progress::-webkit-progress-value { background: linear-gradient(90deg, #38bdf8, #facc15); border-radius: 20px; transition: width .2s ease; }
+
+#log { 
+    max-height: 280px; 
+    overflow: auto; 
+    padding: 16px; 
+    background: #050508; 
+    border: 3px solid #1e293b; 
+    border-radius: 12px; 
+    font-family: 'Courier Prime', monospace; 
+    font-size: 13px; 
+    line-height: 1.6; 
+    color: #38bdf8; 
+}
+
+/* Animation SVG Cartoon Flottante */
+@keyframes float {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-8px) rotate(2deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
+}
+.cartoon-svg {
+    animation: float 3s ease-in-out infinite;
+    filter: drop-shadow(0 10px 8px rgba(0,0,0,0.4));
+    margin: 0 auto 15px auto;
+    display: block;
+}
+
+@media (max-width: 480px) { 
+    body { padding: 10px; } 
+    main { margin: 5px auto; } 
+    .card { padding: 18px; } 
+    .config-grid { grid-template-columns: 1fr; } 
+    .stats { gap: 8px; } 
+    .stat strong { font-size: 22px; } 
+}
 </style>
 </head>
 <body>
 <main>
 <!-- SECTION SÉCURITÉ -->
 <section id="login" class="card text-center">
-  <h1 class="text-xl font-bold mb-2">SÉCURITÉ MINIMALE</h1>
-  <p class="mb-4">Clique sur les couleurs dans l'ordre requis.</p>
+  <!-- Illustration SVG Cartoon de Cadenas Interactif -->
+  <svg class="cartoon-svg" width="90" height="90" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="20" y="45" width="60" height="45" rx="12" fill="#3b82f6" stroke="#1d4ed8" stroke-width="6"/>
+    <path d="M35 45V32C35 23.7157 41.7157 17 50 17C58.2843 17 65 23.7157 65 32V45" stroke="#facc15" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="50" cy="65" r="8" fill="#facc15" stroke="#b45309" stroke-width="4"/>
+    <path d="M50 73V79" stroke="#b45309" stroke-width="4" stroke-linecap="round"/>
+  </svg>
+
+  <h1>SÉCURITÉ DU SYSTÈME</h1>
+  <p class="mb-4">Clique sur les couleurs dans l'ordre requis pour déverrouiller le testeur !</p>
   <div id="grid" class="grid-container"></div>
   <div id="loginStatus" class="status" role="status" aria-live="polite"></div>
 </section>
 
 <!-- SECTION TESTEUR HTTP -->
 <section id="tester" class="card" hidden>
+  <!-- Illustration SVG Cartoon de Fusée / Serveur -->
+  <svg class="cartoon-svg" width="90" height="90" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M50 10C50 10 30 30 30 60C30 75 40 85 50 90C60 85 70 75 70 60C70 30 50 10 50 10Z" fill="#ef4444" stroke="#991b1b" stroke-width="6"/>
+    <circle cx="50" cy="50" r="12" fill="#38bdf8" stroke="#0369a1" stroke-width="4"/>
+    <path d="M25 70L15 80" stroke="#facc15" stroke-width="6" stroke-linecap="round"/>
+    <path d="M75 70L85 80" stroke="#facc15" stroke-width="6" stroke-linecap="round"/>
+  </svg>
+
   <h1>TESTEUR DE REQUÊTES HTTP</h1>
   <p>Utilise cet outil uniquement sur un serveur que tu possèdes ou que tu es autorisé à tester.</p>
+  
   <label for="url">URL du serveur</label>
   <input id="url" type="url" placeholder="https://ton-serveur.example/health">
 
@@ -130,7 +245,7 @@ progress::-moz-progress-bar { background: #38bdf8; border-radius: 20px; }
 
   <label for="interval">Intervalle entre les débuts de requêtes (ms)</label>
   <input id="interval" type="number" min="100" max="60000" value="1000">
-  <p id="limitsInfo"></p>
+  <p id="limitsInfo" style="color: #facc15; font-size: 13px; margin-top: 5px;"></p>
 
   <div class="stats">
     <div class="stat">Total<strong id="total">0</strong></div>
@@ -141,7 +256,7 @@ progress::-moz-progress-bar { background: #38bdf8; border-radius: 20px; }
   <div class="progress-section">
     <div class="progress-heading"><span>Progression du test</span><span id="progressPercent">0 %</span></div>
     <progress id="progressBar" max="100" value="0">0%</progress>
-    <span id="progressDetail">Aucun test en cours.</span>
+    <span id="progressDetail" style="display: block; margin-top: 8px; font-size: 13px; color: #94a3b8;">Aucun test en cours.</span>
   </div>
 
   <div class="actions">
@@ -153,30 +268,31 @@ progress::-moz-progress-bar { background: #38bdf8; border-radius: 20px; }
     <button type="button" class="action download" id="export">Exporter le rapport</button>
   </div>
   <div id="testStatus" class="status info" role="status" aria-live="polite">En attente.</div>
+  
   <h2>Journal des résultats</h2>
   <div id="log">Aucun test lancé.</div>
 </section>
 </main>
 
 <script>
-// CONFIGURATION DU TESTEUR HTTP (Sécurisée pour ne pas surcharger la tablette/serveur)
+// CONFIGURATION DU TESTEUR HTTP
 const CONFIG = {
-  MAX_REQUESTS_PER_TEST: 100000000,
-  MAX_REQUESTS_PER_SCHEDULED_PASS: 100000,
+  MAX_REQUESTS_PER_TEST: 1000,
+  MAX_REQUESTS_PER_SCHEDULED_PASS: 500,
   MAX_SCHEDULED_PASSES: 100,
-  MIN_INTERVAL_MS: 1,
-  MAX_INTERVAL_MS: 2000,
-  REQUEST_TIMEOUT_MS: 1,
+  MIN_INTERVAL_MS: 100,
+  MAX_INTERVAL_MS: 60000,
+  REQUEST_TIMEOUT_MS: 5000,
   MIN_SCHEDULE_INTERVAL_MINUTES: 1,
   MAX_SCHEDULE_INTERVAL_MINUTES: 1440,
   DEFAULT_REQUESTS: 10,
-  DEFAULT_INTERVAL_MS: 2000,
+  DEFAULT_INTERVAL_MS: 1000,
   DEFAULT_REQUESTS_PER_PASS: 3,
   DEFAULT_PASS_COUNT: 3,
   DEFAULT_SCHEDULE_MINUTES: 15
 };
 
-// GESTION ANTI-VEILLE lÉGÈRE (Web Audio API - Pas de lag, pas de vidéo)
+// GESTION ANTI-VEILLE lÉGÈRE (Web Audio API)
 let audioCtx = null;
 let oscillator = null;
 
@@ -191,7 +307,7 @@ function enableKeepAwake() {
     if (!oscillator) {
       oscillator = audioCtx.createOscillator();
       const gainNode = audioCtx.createGain();
-      gainNode.gain.value = 0.00001; // Volume quasi nul (totalement inaudible)
+      gainNode.gain.value = 0.00001; 
       oscillator.connect(gainNode);
       gainNode.connect(audioCtx.destination);
       oscillator.start(0);
@@ -208,18 +324,18 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
-// LOGIQUE DE SÉCURITÉ (Grille de couleurs cliquable)
+// LOGIQUE DE SÉCURITÉ
 const targetSequence = ['green', 'red', 'purple', 'pink', 'orange', 'green'];
 let currentIndex = 0;
 
 let tiles = [
-    { id: 1, color: 'green', hex: '#00ff66' },
-    { id: 2, color: 'red', hex: '#ff0055' },
-    { id: 3, color: 'purple', hex: '#9333ea' },
+    { id: 1, color: 'green', hex: '#22c55e' },
+    { id: 2, color: 'red', hex: '#ef4444' },
+    { id: 3, color: 'purple', hex: '#a855f7' },
     { id: 4, color: 'pink', hex: '#ec4899' },
     { id: 5, color: 'orange', hex: '#f97316' },
-    { id: 6, color: 'green', hex: '#00ff66' },
-    { id: 7, color: 'cyan', hex: '#00ffff' },
+    { id: 6, color: 'green', hex: '#22c55e' },
+    { id: 7, color: 'cyan', hex: '#06b6d4' },
     { id: 8, color: 'yellow', hex: '#eab308' },
     { id: 9, color: 'blue', hex: '#3b82f6' }
 ];
@@ -246,7 +362,7 @@ function renderGrid() {
 }
 
 function handleTileClick(tile) {
-    enableKeepAwake(); // Active l'anti-veille dès la première interaction
+    enableKeepAwake();
 
     if (tile.color === targetSequence[currentIndex]) {
         currentIndex++;
